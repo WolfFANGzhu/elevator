@@ -11,8 +11,15 @@ In this project, our goal was to develop a software to manage the operation of t
   - Weight limit is $800kg$, denoted as `weight_limit = 800`
 
 ## 3. Basic use case
+### 3.1 Use case diagram
 <div align=center><img src=./Use_case_diagram.png></div>
-<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system use case diagram</center> 
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system normal use case diagram</center>  
+This is a preliminary overview of the normal use case diagram for the elevator system. Specific details and requirements are discussed in the following sections.
+
+### 3.2 Sequence diagram
+<div align=center><img src=./basic_sequence.png></div>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system basic sequence diagram</center> 
+This is a preliminary overview of the basic sequence diagram for the elevator system while using. Specific details and requirements are discussed in the following sections.
 
 ## Normal requirements
 1. Requirement1: Elevator_UI  
