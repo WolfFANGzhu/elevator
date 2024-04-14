@@ -1,10 +1,18 @@
-# Requirement
-## basic requirements
-- A building with 3 floors
-- 2 elevators (should be coordinated)
-- Interfaces – Button panels and display inside each elevator – Button panels and display on each floor
-- System Events – Door open, door closed
-- Elevator arrive at each floor
+# Elevator System Requirement
+## 1.System goal
+In this project, our goal was to develop a software to manage the operation of two elevators in a three-floor building and to improve the efficiency of this process. We not only designed button panels and UIs for each floor and each elevator so that the user can know what is going on in the elevator, but also designed the elevator control system so that the scheduling of the two elevators can be done more efficiently, thus providing a better experience for the user.
+
+## 2.Basic requirements setting
+- There are three floors, denoted as `floor_num = 3`
+- There are two elevators, denoted as `elevator_num = 2`
+- Setting limits on elevators:
+  - Max speed is $1m/s$, denoted as `max_speed = 1`
+  - Time to open and close the door is $4s$, denoted as `time_open_close = 4`
+  - Weight limit is $800kg$, denoted as `weight_limit = 800`
+
+## 3. Basic use case
+<div align=center><img src=./Use_case_diagram.png></div>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system use case diagram</center> 
 
 ## Normal requirements
 1. Requirement1: Elevator_UI  
