@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Elevator System Requirement</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="elevator-system-requirement">Elevator System Requirement</h1>
+<h2 id="1system-goal">1.System goal</h2>
+<p>In this project, our goal was to develop a software to manage the operation of two elevators in a three-floor building and to improve the efficiency of this process. We not only designed button panels and UIs for each floor and each elevator so that the user can know what is going on in the elevator, but also designed the elevator control system so that the scheduling of the two elevators can be done more efficiently, thus providing a better experience for the user.</p>
+<h2 id="2basic-requirements-setting">2.Basic requirements setting</h2>
+<ul>
+<li>There are three floors, denoted as <code>floor_num = 3</code></li>
+<li>There are two elevators, denoted as <code>elevator_num = 2</code></li>
+<li>Setting limits on elevators:
+<ul>
+<li>Max speed is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>m</mi><mi mathvariant="normal">/</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">1m/s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord mathnormal">m</span><span class="mord">/</span><span class="mord mathnormal">s</span></span></span></span>, denoted as <code>max_speed = 1</code></li>
+<li>Time to open and close the door is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3.2</mn><mi>s</mi></mrow><annotation encoding="application/x-tex">3.2s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3.2</span><span class="mord mathnormal">s</span></span></span></span>, denoted as <code>time_open_close = 3.2</code></li>
+<li>Time to stop when the door open is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><mi>s</mi></mrow><annotation encoding="application/x-tex">10s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span><span class="mord mathnormal">s</span></span></span></span>, denoted as <code>time_wait = 10</code></li>
+<li>Weight limit is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>800</mn><mi>k</mi><mi>g</mi></mrow><annotation encoding="application/x-tex">800kg</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">800</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span></span></span>, denoted as <code>weight_limit = 800</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="3-basic-use-case">3. Basic use case</h2>
+<h3 id="31-use-case-diagram">3.1 Use case diagram</h3>
+<div align=center><img src=./Use_case_diagram.png width = "70%" ></div>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system normal use case diagram</center>  
+This is a preliminary overview of the normal use case diagram for the elevator system. Specific details and requirements are discussed in the following sections.
+<h3 id="32-sequence-diagram">3.2 Sequence diagram</h3>
+<div align=center><img src=./basic_sequence.png width = "70%" ></div>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system basic sequence diagram</center> 
+This is a preliminary overview of the basic sequence diagram for the elevator system while using. Specific details and requirements are discussed in the following sections.
+<h2 id="normal-requirements">Normal requirements</h2>
+<ol>
+<li>Requirement1: Elevator_UI</li>
+</ol>
+<ul>
+<li>R1.1: The passengers should be able to know elevator's position and moving direction.</li>
+<li>R1.2: The passengers should be able to control the elevator's door, including open and close while the elevator is stopping.</li>
+<li>R1.3: The passengers should be able to select the certain floor they want to go.</li>
+<li>R1.4: The passengers should be able to call security guard while emergency occurs.</li>
+<li>R1.5: The elevator controller system should be able to get the information when passengers press the buttons.</li>
+</ul>
+<ol start="2">
+<li>Requirement2: Floor_UI</li>
+</ol>
+<ul>
+<li>R2.1: The passengers should be able to know two elevators' position and moving direction.</li>
+<li>R2.2: The passengers should be able to select and press the direction button they want to go.</li>
+<li>R2.3: The passengers should be able to know which floor they are on.</li>
+<li>R2.4: The elevator controller system should be able to know how buttons are pressed on each floor.</li>
+</ul>
+<ol start="3">
+<li>Requirement3: Elevator_controller_system</li>
+</ol>
+<ul>
+<li>R3.1: The controller system should be able to schedule the two elevators
+<ul>
+<li>R3.1.1: The controller system should assign a close or not in used elevator to pick users up if there is a need.
+<ul>
+<li>R3.1.1.1: If both elevators are not in used, assign the closer one to pick users.</li>
+<li>R3.1.1.2: If one elevator is using and another one is not, assign the free elevator to go.</li>
+<li>R3.1.1.3: If both are working, users should wait for one to be free.</li>
+</ul>
+</li>
+<li>R3.1.2: The controller system should not assign two elevators at the same time to take users on a certain floor.</li>
+<li>R3.1.3: The controller system should allow the elevator to deliver users to the target floor and not stop at non-target floors.</li>
+</ul>
+</li>
+<li>R3.2: The controller system should be able to control the door of the elevator
+<ul>
+<li>R3.2.1: While moving, the controller system should hold the door closed.</li>
+<li>R3.2.2: Every time, the controller system should open and close the door for a fixed time <code>time_open_close = 3.2</code>.</li>
+<li>R3.2.3: After arriving, the controller system should open the door and wait for a fixed time  <code>time_wait = 10</code>.</li>
+<li>R3.2.4: If someone press the close button, the controller system should close the door in advance. But if there's someone getting on the elevator, the controller system should not close the door.</li>
+<li>R3.2.5: If someone press the open button, the controller system should open the door for an additional time.</li>
+<li>R3.2.6: If the elevator carries a weight bigger than the maximum weight limit, the elevator should not be able to close the door and raise an alarm.</li>
+</ul>
+</li>
+<li>R3.3: The controller system should be able to handle with the emergency when occurs.</li>
+<li>R3.4: The controller system should be able to receive the commands from the button panels and information about the elevator</li>
+<li>R3.5: The controller system should allow the elevators to operate in a safe condition, including operating at a speed less than the maximum speed and carrying a weight less than the maximum weight limit.</li>
+</ul>
+<h2 id="special-cases-in-discussion">Special cases in discussion</h2>
+<ul>
+<li>Elevator alarm when overloaded.</li>
+<li>The elevator on the first floor only goes up.</li>
+<li>The third floor elevator only goes down.</li>
+<li>Open the door and close it at the same time. It won't close.</li>
+<li>Press any key to see if there is an elevator bug.</li>
+<li>When the elevator goes up, the first floor is pressed and when it reaches the third floor/ the second floor(Depends on the top floor being pressed), the 1st floor button is canceled.</li>
+<li>No one presses the button on the third floor. At this point, the second floor goes up, but people press the button to go to the first floor, and the elevator closes, then opens, then closes again and goes down to the first floor.</li>
+<li>Press repeatedly to cancel.</li>
+<li>One on the 1st floor, one on the 3rd floor initially.</li>
+<li>People need to press the button in advance or they can't get to the target floor.</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
