@@ -140,9 +140,9 @@
         </head>
         <body class="vscode-body vscode-light">
             <h1 id="elevator-system-requirement">Elevator System Requirement</h1>
-<h2 id="1system-goal">1.System goal</h2>
+<h2 id="1-system-goal">1. System goal</h2>
 <p>In this project, our goal was to develop a software to manage the operation of two elevators in a three-floor building and to improve the efficiency of this process. We not only designed button panels and UIs for each floor and each elevator so that the user can know what is going on in the elevator, but also designed the elevator control system so that the scheduling of the two elevators can be done more efficiently, thus providing a better experience for the user.</p>
-<h2 id="2basic-requirements-setting">2.Basic requirements setting</h2>
+<h2 id="2-basic-requirements-setting">2. Basic requirements setting</h2>
 <ul>
 <li>There are three floors, denoted as <code>floor_num = 3</code></li>
 <li>There are two elevators, denoted as <code>elevator_num = 2</code></li>
@@ -151,20 +151,25 @@
 <li>Max speed is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>m</mi><mi mathvariant="normal">/</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">1m/s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord mathnormal">m</span><span class="mord">/</span><span class="mord mathnormal">s</span></span></span></span>, denoted as <code>max_speed = 1</code></li>
 <li>Time to open and close the door is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3.2</mn><mi>s</mi></mrow><annotation encoding="application/x-tex">3.2s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3.2</span><span class="mord mathnormal">s</span></span></span></span>, denoted as <code>time_open_close = 3.2</code></li>
 <li>Time to stop when the door open is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><mi>s</mi></mrow><annotation encoding="application/x-tex">10s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span><span class="mord mathnormal">s</span></span></span></span>, denoted as <code>time_wait = 10</code></li>
-<li>Weight limit is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>800</mn><mi>k</mi><mi>g</mi></mrow><annotation encoding="application/x-tex">800kg</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">800</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span></span></span>, denoted as <code>weight_limit = 800</code></li>
+<li>Weight limitation is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>800</mn><mi>k</mi><mi>g</mi></mrow><annotation encoding="application/x-tex">800kg</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">800</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span></span></span>, denoted as <code>weight_limit = 800</code></li>
+<li>People limitation is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn></mrow><annotation encoding="application/x-tex">10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span></span></span></span>, denoted as <code>max_people_num = 10</code></li>
 </ul>
 </li>
 </ul>
 <h2 id="3-basic-use-case">3. Basic use case</h2>
 <h3 id="31-use-case-diagram">3.1 Use case diagram</h3>
-<div align=center><img src=./Use_case_diagram.png width = "70%" ></div>
+<div align=center><img src=./new_use_case.png width = "65%" ></div>
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system normal use case diagram</center>  
 This is a preliminary overview of the normal use case diagram for the elevator system. Specific details and requirements are discussed in the following sections.
 <h3 id="32-sequence-diagram">3.2 Sequence diagram</h3>
 <div align=center><img src=./basic_sequence.png width = "70%" ></div>
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system basic sequence diagram</center> 
 This is a preliminary overview of the basic sequence diagram for the elevator system while using. Specific details and requirements are discussed in the following sections.
-<h2 id="normal-requirements">Normal requirements</h2>
+<h3 id="33-class-diagram">3.3 Class diagram</h3>
+<div align=center><img src=./class_diagram.png width = "70%" ></div>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system physical consists class diagram</center> 
+This is an intact overview of the class diagram for the elevator system physical consists.
+<h2 id="4-normal-requirements">4. Normal requirements</h2>
 <ol>
 <li>Requirement1: Elevator_UI</li>
 </ol>
@@ -215,7 +220,7 @@ This is a preliminary overview of the basic sequence diagram for the elevator sy
 <li>R3.4: The controller system should be able to receive the commands from the button panels and information about the elevator</li>
 <li>R3.5: The controller system should allow the elevators to operate in a safe condition, including operating at a speed less than the maximum speed and carrying a weight less than the maximum weight limit.</li>
 </ul>
-<h2 id="special-cases-in-discussion">Special cases in discussion</h2>
+<h2 id="5-special-cases-in-discussion">5. Special cases in discussion</h2>
 <ul>
 <li>Elevator alarm when overloaded.</li>
 <li>The elevator on the first floor only goes up.</li>

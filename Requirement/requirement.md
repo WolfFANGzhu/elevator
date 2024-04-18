@@ -1,19 +1,20 @@
 # Elevator System Requirement
-## 1.System goal
+## 1. System goal
 In this project, our goal was to develop a software to manage the operation of two elevators in a three-floor building and to improve the efficiency of this process. We not only designed button panels and UIs for each floor and each elevator so that the user can know what is going on in the elevator, but also designed the elevator control system so that the scheduling of the two elevators can be done more efficiently, thus providing a better experience for the user.
 
-## 2.Basic requirements setting
+## 2. Basic requirements setting
 - There are three floors, denoted as `floor_num = 3`
 - There are two elevators, denoted as `elevator_num = 2`
 - Setting limits on elevators:
   - Max speed is $1m/s$, denoted as `max_speed = 1`
   - Time to open and close the door is $3.2s$, denoted as `time_open_close = 3.2`
   - Time to stop when the door open is $10s$, denoted as `time_wait = 10`
-  - Weight limit is $800kg$, denoted as `weight_limit = 800`
+  - Weight limitation is $800kg$, denoted as `weight_limit = 800`
+  - People limitation is $10$, denoted as `max_people_num = 10` 
 
 ## 3. Basic use case
 ### 3.1 Use case diagram
-<div align=center><img src=./Use_case_diagram.png width = "70%" ></div>
+<div align=center><img src=./new_use_case.png width = "65%" ></div>
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system normal use case diagram</center>  
 This is a preliminary overview of the normal use case diagram for the elevator system. Specific details and requirements are discussed in the following sections.
 
@@ -22,7 +23,12 @@ This is a preliminary overview of the normal use case diagram for the elevator s
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system basic sequence diagram</center> 
 This is a preliminary overview of the basic sequence diagram for the elevator system while using. Specific details and requirements are discussed in the following sections.
 
-## Normal requirements
+### 3.3 Class diagram
+<div align=center><img src=./class_diagram.png width = "70%" ></div>
+<center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system physical consists class diagram</center> 
+This is an intact overview of the class diagram for the elevator system physical consists.
+
+## 4. Normal requirements
 1. Requirement1: Elevator_UI  
 - R1.1: The passengers should be able to know elevator's position and moving direction.
 - R1.2: The passengers should be able to control the elevator's door, including open and close while the elevator is stopping.
@@ -55,7 +61,7 @@ This is a preliminary overview of the basic sequence diagram for the elevator sy
 - R3.4: The controller system should be able to receive the commands from the button panels and information about the elevator
 - R3.5: The controller system should allow the elevators to operate in a safe condition, including operating at a speed less than the maximum speed and carrying a weight less than the maximum weight limit.
 
-## Special cases in discussion
+## 5. Special cases in discussion
 - Elevator alarm when overloaded.
 - The elevator on the first floor only goes up.
 - The third floor elevator only goes down. 
