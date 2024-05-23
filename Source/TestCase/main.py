@@ -54,7 +54,7 @@ def testing(server:Server.ZmqServerThread):
                 return True
     
     ############ Initialize Passengers ############
-    passengers = [Passenger(1, 3,"A")] ##There can be many passengers in testcase.
+    passengers = [Passenger(1, 3,"A"),Passenger(2,1,"B")] ##There can be many passengers in testcase.
     timeStamp = -1 #default time stamp is -1
     clientMessage = "" #default received message is ""
     messageUnprocessed = False #Used when receiving new message 
@@ -127,10 +127,11 @@ def testing(server:Server.ZmqServerThread):
                         messageUnprocessed = False
                         if(clientMessage.startswith(each_passenger.matching_signal) and each_passenger.current_floor == each_passenger.start_floor):
                             each_passenger.set_elevator_code(int(clientMessage.split("#")[-1]))
+                            print(f"Passenger {each_passenger.name} elevator to step in is {each_passenger.get_elevator_code()}")
                         
                         if(clientMessage == f"door_opened#{each_passenger.get_elevator_code()}"):
                             print(f"Passenger {each_passenger.name} is Entering the elevator {each_passenger.get_elevator_code()}")
-                            time.sleep(1)
+                            time.sleep(0.01)
                             if(each_passenger.get_elevator_code() == 1):
                                 each_passenger.change_state(PassengerState.IN_ELEVATOR_1_AT_OTHER_FLOOR)
                             elif(each_passenger.get_elevator_code() == 2):

@@ -1,18 +1,24 @@
 from elevator import Elevator
 from elevatorState import State
+from direction import Direction
 import NetClient
+# Elevator Controller
+# This class is responsible for 
+# 1. Parsing the command from the server
+# 2. Assigning the inner button panel(open, close, select floor) to the elevator, without considering constraints
+# 3. Assigning the outer button panel(call up, call down) to the elevator, considering which task to assign to which elevator
 class ElevatorController:
 
     
     def __init__(self,zmqThread:NetClient.ZmqClientThread) -> None:
         # Initialize two elevators
         self.elevators: list[Elevator] = []
-        self.elevators.append(Elevator(1,zmqThread))
-        self.elevators.append(Elevator(2,zmqThread))
         # Button Panel Outside the Elevator
         self.upTask = [0,0] # 0 means up@1, 1 means up@2
         self.downTask = [0,0] # 0 means down@2, 1 means down@3
         self.msgQueue:list[str] = []
+        self.elevators.append(Elevator(1,zmqThread,self.upTask,self.downTask))
+        self.elevators.append(Elevator(2,zmqThread,self.upTask,self.downTask))
     def parseInput(self, command: str) -> None:
         # Parse the command from server
         """
@@ -28,82 +34,59 @@ class ElevatorController:
         action = command_parts[0]
         if action == "open_door":
             # Code to handle opening the door
-            pass
+            self.elevators[0].setOpenDoorFlag()
+            return
         elif action == "close_door":
             # Code to handle closing the door
+            self.elevators[0].setCloseDoorFlag()
             pass
         elif action == "call_up":
+            # Basic logic is find an elevator is available and assign the task
+            # Difficulty is that we dont know the potential direction the elevator is moving towards?
             floor = int(command_parts[1])
             # Intialize an empty var
             eid = -1
-            # 先判断：is there any elevator that is at the requesting floor and not going to move in the opposite direction
-            for i in range(2):
-                if self.elevators[i].currentFloor == floor and self.elevators[i].currentDirection != -1:
-                    # if the elevator is at the requesting floor and is not going down
-                    eid = i
-                    self.elevators[i].setOpenDoorFlag()
-                    return
-    
-            # 先找空闲电梯离自己最近的一层的
+            # Very basic operation: find the nearest idle elevator to respond to request
             eid = self.getNearestStopElevator(floor)
-            if(eid != -1):
-                # Assign task
-                self.elevators[eid].addTargetFloor(floor)
+
+            if eid != -1:
+                self.elevators[eid].targetFloor.append(floor)
                 return
-            # 有没有电梯位置小于这一层且正在上行的(搭便车向上的情况只会出现在2层，所以只限定2层的request)
-            if(floor == 2):
-                eid = self.getUpElevator(floor)
-                if(eid != -1):
-                    self.elevators[eid].addTargetFloor(floor)
-                    return
-                
+
             # 都没有，等待出现这个情况，加入等待队列，每一个update查询一遍
             self.msgQueue.append(command)
             pass
         elif action == "call_down":
             floor = int(command_parts[1])
-            # Intialize an empty var
             eid = -1
-            # 先判断：is there any elevator that is at the requesting floor and not going to move in the opposite direction
-            for i in range(2):
-                if self.elevators[i].currentFloor == floor and self.elevators[i].currentDirection != 1:
-                    # if the elevator is at the requesting floor and is not going down
-                    eid = i
-                    self.elevators[i].setOpenDoorFlag()
-                    return
             # 先找空闲电梯离自己最近的一层的
             eid = self.getNearestStopElevator(floor)
             if(eid != -1):
                 # Assign task
                 self.elevators[eid].addTargetFloor(floor)
                 return
-            # 有没有电梯位置大于这一层且正在下行的
-            if(floor == 2):
-                eid = self.getDownElevator(floor)
-                if(eid != -1):
-                    self.elevators[eid].addTargetFloor(floor)
-                    return
-            # 都没有，等待出现这个情况，加入等待队列，每一个update查询一遍
+            # # 都没有，等待出现这个情况，加入等待队列，每一个update查询一遍
             self.msgQueue.append(command)
             pass
         elif action == "select_floor":
-            eid, floor = command_parts[1].split('#')
-            eid = int(eid-1)
+            floor,eid = command_parts[1].split('#')
+            eid = int(eid)-1
             floor = int(floor)
+            print("user select in elevator#",eid+1, " floor",floor)
             elevator:Elevator = self.elevators[eid]
-            # 计算 direction
+            # calculate direction by this command
             if(elevator.currentPos < floor):
-                direction = 1 # up
+                direction = Direction.up # up
             elif(elevator.currentPos > floor): # down
-                direction = -1
+                direction = Direction.down
             else:
-                direction = 0 # same
+                direction = Direction.wait # same
             # 这个电梯方向相同或方向状态不存在，插入target priority queue
-            if elevator.currentDirection == direction or elevator.currentDirection == 0:
+            if elevator.currentDirection == direction or elevator.currentDirection == Direction.wait:
                 elevator.addTargetFloor(floor) # 如果电梯向上，从小到大[2,3],反之[2,1]
 
-            # 这个电梯有target楼层，方向不同，插入waiting queue，待所有target清空后，把waiting queue插入target queue
-            # 暂时不考虑这种情况
+            
+            # 暂时不考虑用户选的方向相反这种情况
             pass
         elif action == "reset":
             self.reset()
@@ -116,10 +99,10 @@ class ElevatorController:
         # return index of the elevator; return -1 if no elevator is available
         dist = [99,99]
         min_index = -1
-        if(self.elevators[0].currentState == State.stopped_door_closed):
-            dist[0] = abs(self.elevators[0].currentFloor - floor)
-        if(self.elevators[1].currentState == State.stopped_door_closed):
-            dist[1] = abs(self.elevators[1].currentFloor - floor)
+        if(self.elevators[0].currentState == State.stopped_door_closed and len(self.elevators[0].targetFloor)==0):
+            dist[0] = abs(self.elevators[0].getCurrentFloor() - floor)
+        if(self.elevators[1].currentState == State.stopped_door_closed and len(self.elevators[0].targetFloor)==0):
+            dist[1] = abs(self.elevators[1].getCurrentFloor() - floor)
         if(dist[0] == 99 and dist[1] == 99):
             return -1
         min_index = dist.index(min(dist))
