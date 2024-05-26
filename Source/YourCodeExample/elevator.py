@@ -1,10 +1,13 @@
 from elevatorState import State
 from direction import Direction
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox,QWidget
 import NetClient
 # Elevator
-class Elevator:
+class Elevator(QWidget):
 
     def __init__(self,elevatorId:int,zmqThread:NetClient.ZmqClientThread,upTask,downTask) -> None:
+        super().__init__()
         self.elevatorId = elevatorId
         self.zmqThread = zmqThread
         # Move related variables
@@ -28,6 +31,8 @@ class Elevator:
         self.__doorCloseFlag: bool = False
         # State
         self.currentState: State = State.stopped_door_closed
+        # Init Ui
+        self.setupUi(self,elevatorId)
         return
 
     def reset(self) -> None:
@@ -171,7 +176,7 @@ class Elevator:
         return round(self.currentPos)
     
             
-# Utility Functions for controller
+# Utility Functions for controller & button panel inside this elevator
     # Reveive outer request from controller
     def addTargetFloor(self, floor: int) -> None:
         if floor in self.targetFloor:
@@ -211,3 +216,107 @@ class Elevator:
             pass
         return
     
+
+    """UI Related functions"""
+    def setupUi(self):
+        self.setObjectName("InsideWidget")
+        self.resize(222, 289)
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        self.Direction = QtWidgets.QGraphicsView()
+        layout.addWidget(self.Direction)
+
+        self.LCD = QtWidgets.QLCDNumber()
+        self.set_lcd_value(1) # default value is 1
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(20)
+        self.LCD.setFont(font)
+        self.LCD.setSmallDecimalPoint(False)
+        self.LCD.setDigitCount(1)
+        self.LCD.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
+        layout.addWidget(self.LCD)
+
+        self.f3 = QtWidgets.QPushButton("3")
+        self.f3.clicked.connect(self.on_f3_clicked)
+        self.f3_activeFlag = False
+        layout.addWidget(self.f3)
+
+        self.f2 = QtWidgets.QPushButton("2")
+        self.f2.clicked.connect(self.on_f2_clicked)
+        self.f2_activeFlag = False
+        layout.addWidget(self.f2)
+
+        self.f1 = QtWidgets.QPushButton("1")
+        self.f1.clicked.connect(self.on_f1_clicked)
+        self.f1_activeFlag = False
+        layout.addWidget(self.f1)
+
+        self.open = QtWidgets.QPushButton("<|>")
+        self.open.clicked.connect(self.on_open_clicked)
+        layout.addWidget(self.open)
+
+        self.close = QtWidgets.QPushButton(">|<")
+        self.close.clicked.connect(self.on_close_clicked)
+        layout.addWidget(self.close)
+
+        self.label = QtWidgets.QLabel("E#" + str(self.elevatorId))
+        layout.addWidget(self.label)
+
+        # ReTranslate UI
+        _translate = QtCore.QCoreApplication.translate
+        self.setWindowTitle(_translate("InsideWidget", "Elevator#" + str(self.elevatorId)))
+        self.label.setText(_translate("InsideWidget", "E#" + str(self.elevatorId)))
+    # button click event
+    def on_f1_clicked(self):
+        if self.f1_activeFlag:
+            return
+        else:
+            self.f1_activeFlag = True
+            self.floorbutton_clicked(self.f1,1)
+    def on_f2_clicked(self):
+        if self.f2_activeFlag:
+            return
+        else:
+            self.f2_activeFlag = True
+            self.floorbutton_clicked(self.f2,2)
+    def on_f3_clicked(self):
+        if self.f3_activeFlag:
+            return
+        else:
+            self.f3_activeFlag = True
+            self.floorbutton_clicked(self.f3,3)
+    def floorbutton_clicked(self,button:QtWidgets.QPushButton,floor:int):
+        if(self.currentPos < floor):
+                direction = Direction.up # up
+        elif(self.currentPos > floor): # down
+                direction = Direction.down
+        else:
+            direction = Direction.wait # same
+        # 这个电梯方向相同或方向状态不存在，插入target priority queue
+        if self.currentDirection == direction or self.currentDirection == Direction.wait:
+            button.setStyleSheet("background-color: yellow;")
+            self.addTargetFloor(floor) # 如果电梯向上，从小到大[2,3],反之[2,1]
+    def resetUi(self):
+        self.f1_activeFlag = False
+        self.f2_activeFlag = False
+        self.f3_activeFlag = False
+        self.f1.setStyleSheet("background-color: none;")
+        self.f2.setStyleSheet("background-color: none;")
+        self.f3.setStyleSheet("background-color: none;")
+    def updateUi(self):
+        self.set_lcd_value(self.getCurrentFloor())
+        
+    def on_open_clicked(self):
+        # Open button may not be light up on pressed, it is only for testing
+        self.open.setStyleSheet("background-color: yellow;")
+        self.setOpenDoorFlag()
+    def on_close_clicked(self):
+        print("close button is pressed!")
+
+    # Other util functions
+
+    def set_lcd_value(self,value):
+        self.LCD.display(value)
+
