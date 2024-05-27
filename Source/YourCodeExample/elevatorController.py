@@ -9,18 +9,19 @@ from PyQt5.QtWidgets import QMessageBox,QWidget
 # 1. Parsing the command from the server
 # 2. Assigning the inner button panel(open, close, select floor) to the elevator, without considering constraints
 # 3. Assigning the outer button panel(call up, call down) to the elevator, considering which task to assign to which elevator
-class ElevatorController(QWidget):
+class ElevatorController():
 
     
-    def __init__(self,zmqThread:NetClient.ZmqClientThread) -> None:
+    def __init__(self,zmqThread:NetClient.ZmqClientThread,elevator1,elevator2) -> None:
         # Initialize two elevators
         self.elevators: list[Elevator] = []
         # Button Panel Outside the Elevator
         self.upTask = [0,0] # 0 means up@1, 1 means up@2
         self.downTask = [0,0] # 0 means down@2, 1 means down@3
         self.msgQueue:list[str] = []
-        self.elevators.append(Elevator(1,zmqThread,self.upTask,self.downTask))
-        self.elevators.append(Elevator(2,zmqThread,self.upTask,self.downTask))
+        self.elevators.append(elevator1)
+        self.elevators.append(elevator2)
+        self.outPanels:list[dict] = []
     def parseInput(self, command: str) -> None:
         # Parse the command from server
         """
@@ -34,9 +35,13 @@ class ElevatorController(QWidget):
         # Parse the command from server
         command_parts = command.split('@')
         action = command_parts[0]
-        if action == "open_door":
+        if action == "open_door#1":
             pass
-        elif action == "close_door":
+        elif action == "open_door#2":
+            pass
+        elif action == "close_door#1":
+            pass
+        elif action == "close_door#2":
             pass
         elif action == "call_up":
             # Basic logic is find an elevator is available and assign the task
@@ -82,7 +87,6 @@ class ElevatorController(QWidget):
             # 这个电梯方向相同或方向状态不存在，插入target priority queue
             if elevator.currentDirection == direction or elevator.currentDirection == Direction.wait:
                 elevator.addTargetFloor(floor) # 如果电梯向上，从小到大[2,3],反之[2,1]
-
             
             # 暂时不考虑用户选的方向相反这种情况
             pass
@@ -126,36 +130,51 @@ class ElevatorController(QWidget):
             self.parseInput(self.msgQueue.pop(0))
         if msg != "":
             self.parseInput(msg)
-        for elevator in self.elevators:
-            elevator.update()
         return
     
-    ### UI part contains three panel
-    def setupUi(self, layout):
-        self.verticalLayout = QtWidgets.QVBoxLayout(layout)
 
-        self.Up = QtWidgets.QPushButton("Up")
-        self.Up.setObjectName("Up")
-        self.verticalLayout.addWidget(self.Up)
-
-        self.Down = QtWidgets.QPushButton("Down")
-        self.Down.setObjectName("Down")
-        self.verticalLayout.addWidget(self.Down)
+############## UI Related Code ##############
+    def create_window(self, window:QWidget,title, up, down):
+        verticalLayout = QtWidgets.QVBoxLayout(window)
+        window.resize(250, 150)
+        controls = {}
 
         lcd_layout = QtWidgets.QHBoxLayout()
-        self.verticalLayout.addLayout(lcd_layout)
+        verticalLayout.addLayout(lcd_layout)
 
-        self.E1 = QtWidgets.QLCDNumber()
-        self.E1.setDigitCount(1)
-        self.E1.setObjectName("E1")
-        lcd_layout.addWidget(self.E1)
+        e1 = QtWidgets.QLCDNumber()
+        e1.setDigitCount(1)
+        e1.setObjectName("E1")
+        lcd_layout.addWidget(e1)
+        controls['e1'] = e1
 
-        self.E2 = QtWidgets.QLCDNumber()
-        self.E2.setDigitCount(1)
-        self.E2.setObjectName("E2")
-        lcd_layout.addWidget(self.E2)
+        e2 = QtWidgets.QLCDNumber()
+        e2.setDigitCount(1)
+        e2.setObjectName("E2")
+        lcd_layout.addWidget(e2)
+        controls['e2'] = e2
+        if up:
+            up_button = QtWidgets.QPushButton("Up")
+            up_button.setObjectName("Up")
+            verticalLayout.addWidget(up_button)
+            controls['up'] = up_button
 
-        _translate = QtCore.QCoreApplication.translate
-        layout.setWindowTitle(_translate("Form", "Form"))
-        self.Up.setText(_translate("Form", "Up"))
-        self.Down.setText(_translate("Form", "Down"))
+        if down:
+            down_button = QtWidgets.QPushButton("Down")
+            down_button.setObjectName("Down")
+            verticalLayout.addWidget(down_button)
+            controls['down'] = down_button
+
+        window.setWindowTitle(title)
+
+        self.outPanels.append(controls)
+
+        # Connect the button to the elevator controller
+        def on_1_up_clicked():
+            return
+        def on_2_up_clicked(): 
+            return
+        def on_2_down_clicked():
+            return
+        def on_3_down_clicked():
+            return

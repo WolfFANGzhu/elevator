@@ -6,6 +6,8 @@ from enum import IntEnum
 from elevator import Elevator
 from elevatorState import State
 from elevatorController import ElevatorController
+from PyQt5.QtCore import QTimer
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 ##Example Code For Elevator Project
 #Feel free to rewrite this file!
@@ -47,14 +49,20 @@ if __name__=='__main__':
     app = QApplication(sys.argv)
     e1 = Elevator(1,zmqThread,[0,0],[0,0])
     e2 = Elevator(2,zmqThread,[0,0],[0,0])
+    # window 1~3 are the windows for the outside panel 
+    window1 = QtWidgets.QWidget()
+    window2 = QtWidgets.QWidget()
+    window3 = QtWidgets.QWidget()   
+    controller = ElevatorController(zmqThread,e1,e2)
+    controller.create_window(window1,"First Floor", up=True, down=False)
+    controller.create_window(window2,"Second Floor", up=True, down=True)
+    controller.create_window(window3,"Third Floor", up=False, down=True)
+    window1.show()
+    window2.show()
+    window3.show()
     e1.show()
     e2.show()
-    sys.exit(app.exec_())
-    while(True):
-        
-        ############ Your timed automata design ############
-        
-
+    def update(timeStamp,serverMessage,messageUnprocessed):
         if(is_received_new_message(timeStamp,serverMessage,messageUnprocessed)):
             timeStamp = zmqThread.messageTimeStamp
             serverMessage = zmqThread.receivedMessage
@@ -63,7 +71,11 @@ if __name__=='__main__':
             temp_msg = ""
         e1.update()
         e2.update()
-        time.sleep(0.01)
+        controller.update(temp_msg)
+    timer = QTimer()
+    timer.timeout.connect(lambda: update(timeStamp, serverMessage, messageUnprocessed))
+    timer.start(100) # 0.1 second
+    sys.exit(app.exec_())
 
             
 
