@@ -2,6 +2,7 @@ from elevatorState import State
 from direction import Direction
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QWidget
+from PyQt5.QtCore import QTimer, Qt
 import NetClient
 # Elevator
 class Elevator(QWidget):
@@ -24,7 +25,7 @@ class Elevator(QWidget):
         # Door related variables
         self.__doorOpenTime: float = 3.2
         self.__doorCloseTime: float = 3.2
-        self.__elevatorWaitTime: float = 10.0
+        self.__elevatorWaitTime: float = 3.2
         self.__doorSpeed: float = 0.1
         self.__doorInterval: float = 0.0
         self.__doorOpenFlag: bool = False
@@ -32,7 +33,12 @@ class Elevator(QWidget):
         # State
         self.currentState: State = State.stopped_door_closed
         # Init Ui
-        self.setupUi(self,elevatorId)
+        self.setupUi()
+
+        # Start timer (loop)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update)
+        self.timer.start(100) # 0.1 second
         return
 
     def reset(self) -> None:
@@ -68,7 +74,10 @@ class Elevator(QWidget):
             # Arrive! transfer state to stopped_door_opening
             arrivedFloor = self.targetFloor.pop(0)
             self.currentPos = float(arrivedFloor)
-            self.floorArrivedMessage(self.currentState,arrivedFloor,self.elevatorId)
+            # self.floorArrivedMessage(self.currentState,arrivedFloor,self.elevatorId)
+            print("elevator: ",self.elevatorId," arrived at floor: ",arrivedFloor)
+            # Clear floor ui
+            self.clear_floor_ui(arrivedFloor)
             self.currentState = State.stopped_opening_door
             if len(self.targetFloor) == 0:
                 self.currentDirection = Direction.wait
@@ -85,7 +94,7 @@ class Elevator(QWidget):
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__doorOpenTime:
             self.__doorInterval = 0.0
-            self.doorOpenedMessage(self.elevatorId)
+            # self.doorOpenedMessage(self.elevatorId)
             self.currentState = State.stopped_door_opened
         return
     def closingDoor(self) -> None:
@@ -102,7 +111,7 @@ class Elevator(QWidget):
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__doorCloseTime:
             self.__doorInterval = 0.0
-            self.doorClosedMessage(self.elevatorId)
+            # self.doorClosedMessage(self.elevatorId)
             self.currentState = State.stopped_door_closed
         return
 
@@ -153,12 +162,18 @@ class Elevator(QWidget):
         # If there is a target floor, begin to move
         if self.targetFloor[0] > self.currentPos:
             self.currentState = State.up
+            self.currentDirection = Direction.up
+            self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         elif self.targetFloor[0] < self.currentPos:
             self.currentState = State.down
+            self.currentDirection = Direction.down
+            self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         elif self.targetFloor[0] == self.currentPos:
             self.targetFloor.remove(int(self.currentPos))
-            self.floorArrivedMessage(State.up,self.getCurrentFloor(),self.elevatorId)
+            self.clear_floor_ui(int(self.currentPos))
+            # self.floorArrivedMessage(State.up,self.getCurrentFloor(),self.elevatorId)
             self.currentState = State.stopped_opening_door
+            self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         return True   
     def checkOpenDoor(self) -> None:
         if self.__doorOpenFlag:
@@ -180,9 +195,10 @@ class Elevator(QWidget):
     # Reveive outer request from controller
     def addTargetFloor(self, floor: int) -> None:
         if floor in self.targetFloor:
-            return
+            return 
+        # Determine the direction of the elevator when adding the target floor
         self.targetFloor.append(floor)
-        self.targetFloor.sort(reverse=(self.currentDirection == Direction.up))
+        self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         print("current target floor: ",self.targetFloor)
         return
     def setOpenDoorFlag(self) -> None:
@@ -193,15 +209,18 @@ class Elevator(QWidget):
         return
     
     def update(self) -> None:
+        self.updateUi()
         if self.currentState == State.up or self.currentState == State.down:
             print("elevator: ",self.elevatorId," is moving",self.currentState.name)
             self.move()
             pass
         elif self.currentState == State.stopped_opening_door:
             self.openingDoor()
+            print("elevator: ",self.elevatorId," is opening door")
             pass
         elif self.currentState == State.stopped_door_opened:
             self.waitForClosingDoor()
+            print("elevator: ",self.elevatorId," is waiting to close")
             pass
         elif self.currentState == State.stopped_closing_door:
             print("elevator: ",self.elevatorId," is closing door")
@@ -223,9 +242,8 @@ class Elevator(QWidget):
         self.resize(222, 289)
 
         layout = QtWidgets.QVBoxLayout(self)
-
-        self.Direction = QtWidgets.QGraphicsView()
-        layout.addWidget(self.Direction)
+        self.label = QtWidgets.QLabel("E#" + str(self.elevatorId))
+        layout.addWidget(self.label)
 
         self.LCD = QtWidgets.QLCDNumber()
         self.set_lcd_value(1) # default value is 1
@@ -237,32 +255,38 @@ class Elevator(QWidget):
         self.LCD.setDigitCount(1)
         self.LCD.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
         layout.addWidget(self.LCD)
+        # self.Direction = QtWidgets.QGraphicsView()
+        
+        # layout.addWidget(self.Direction)
+        # self.Direction.setGeometry(QtCore.QRect(90, 10, 41, 31))
+        button_layout = QtWidgets.QVBoxLayout()
+        layout.addLayout(button_layout)
 
         self.f3 = QtWidgets.QPushButton("3")
         self.f3.clicked.connect(self.on_f3_clicked)
         self.f3_activeFlag = False
-        layout.addWidget(self.f3)
+        button_layout.addWidget(self.f3)
 
         self.f2 = QtWidgets.QPushButton("2")
         self.f2.clicked.connect(self.on_f2_clicked)
         self.f2_activeFlag = False
-        layout.addWidget(self.f2)
+        button_layout.addWidget(self.f2)
 
         self.f1 = QtWidgets.QPushButton("1")
         self.f1.clicked.connect(self.on_f1_clicked)
         self.f1_activeFlag = False
-        layout.addWidget(self.f1)
+        button_layout.addWidget(self.f1)
+
+        control_layout = QtWidgets.QHBoxLayout()
+        layout.addLayout(control_layout)
 
         self.open = QtWidgets.QPushButton("<|>")
         self.open.clicked.connect(self.on_open_clicked)
-        layout.addWidget(self.open)
+        control_layout.addWidget(self.open)
 
         self.close = QtWidgets.QPushButton(">|<")
         self.close.clicked.connect(self.on_close_clicked)
-        layout.addWidget(self.close)
-
-        self.label = QtWidgets.QLabel("E#" + str(self.elevatorId))
-        layout.addWidget(self.label)
+        control_layout.addWidget(self.close)
 
         # ReTranslate UI
         _translate = QtCore.QCoreApplication.translate
@@ -307,12 +331,23 @@ class Elevator(QWidget):
         self.f3.setStyleSheet("background-color: none;")
     def updateUi(self):
         self.set_lcd_value(self.getCurrentFloor())
+    # When a target floor arrives, clear the button
+    def clear_floor_ui(self,floor:int):
+        if floor == 1:
+            self.f1_activeFlag = False
+            self.f1.setStyleSheet("background-color: none;")
+        elif floor == 2:
+            self.f2_activeFlag = False
+            self.f2.setStyleSheet("background-color: none;")
+        elif floor == 3:
+            self.f3_activeFlag = False
+            self.f3.setStyleSheet("background-color: none;")
         
     def on_open_clicked(self):
-        # Open button may not be light up on pressed, it is only for testing
-        self.open.setStyleSheet("background-color: yellow;")
         self.setOpenDoorFlag()
+        print("open button is pressed!")
     def on_close_clicked(self):
+        self.setCloseDoorFlag()
         print("close button is pressed!")
 
     # Other util functions

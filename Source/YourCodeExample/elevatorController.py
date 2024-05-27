@@ -2,12 +2,14 @@ from elevator import Elevator
 from elevatorState import State
 from direction import Direction
 import NetClient
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox,QWidget
 # Elevator Controller
 # This class is responsible for 
 # 1. Parsing the command from the server
 # 2. Assigning the inner button panel(open, close, select floor) to the elevator, without considering constraints
 # 3. Assigning the outer button panel(call up, call down) to the elevator, considering which task to assign to which elevator
-class ElevatorController:
+class ElevatorController(QWidget):
 
     
     def __init__(self,zmqThread:NetClient.ZmqClientThread) -> None:
@@ -33,12 +35,8 @@ class ElevatorController:
         command_parts = command.split('@')
         action = command_parts[0]
         if action == "open_door":
-            # Code to handle opening the door
-            self.elevators[0].setOpenDoorFlag()
-            return
+            pass
         elif action == "close_door":
-            # Code to handle closing the door
-            self.elevators[0].setCloseDoorFlag()
             pass
         elif action == "call_up":
             # Basic logic is find an elevator is available and assign the task
@@ -131,3 +129,33 @@ class ElevatorController:
         for elevator in self.elevators:
             elevator.update()
         return
+    
+    ### UI part contains three panel
+    def setupUi(self, layout):
+        self.verticalLayout = QtWidgets.QVBoxLayout(layout)
+
+        self.Up = QtWidgets.QPushButton("Up")
+        self.Up.setObjectName("Up")
+        self.verticalLayout.addWidget(self.Up)
+
+        self.Down = QtWidgets.QPushButton("Down")
+        self.Down.setObjectName("Down")
+        self.verticalLayout.addWidget(self.Down)
+
+        lcd_layout = QtWidgets.QHBoxLayout()
+        self.verticalLayout.addLayout(lcd_layout)
+
+        self.E1 = QtWidgets.QLCDNumber()
+        self.E1.setDigitCount(1)
+        self.E1.setObjectName("E1")
+        lcd_layout.addWidget(self.E1)
+
+        self.E2 = QtWidgets.QLCDNumber()
+        self.E2.setDigitCount(1)
+        self.E2.setObjectName("E2")
+        lcd_layout.addWidget(self.E2)
+
+        _translate = QtCore.QCoreApplication.translate
+        layout.setWindowTitle(_translate("Form", "Form"))
+        self.Up.setText(_translate("Form", "Up"))
+        self.Down.setText(_translate("Form", "Down"))

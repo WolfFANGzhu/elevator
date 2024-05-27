@@ -1,11 +1,12 @@
 import os
+import sys
 import NetClient
 import time
 from enum import IntEnum
 from elevator import Elevator
 from elevatorState import State
 from elevatorController import ElevatorController
-
+from PyQt5.QtWidgets import QApplication
 ##Example Code For Elevator Project
 #Feel free to rewrite this file!
 
@@ -41,10 +42,14 @@ if __name__=='__main__':
     timeStamp = -1 #Used when receiving new message
     serverMessage = "" #Used when receiving new message
     messageUnprocessed = False #Used when receiving new message 
-    elevatorController:ElevatorController = ElevatorController(zmqThread)
     temp_msg = ""
     
-
+    app = QApplication(sys.argv)
+    e1 = Elevator(1,zmqThread,[0,0],[0,0])
+    e2 = Elevator(2,zmqThread,[0,0],[0,0])
+    e1.show()
+    e2.show()
+    sys.exit(app.exec_())
     while(True):
         
         ############ Your timed automata design ############
@@ -56,7 +61,8 @@ if __name__=='__main__':
             temp_msg = serverMessage
         else:
             temp_msg = ""
-        elevatorController.update(temp_msg)
+        e1.update()
+        e2.update()
         time.sleep(0.01)
 
             
