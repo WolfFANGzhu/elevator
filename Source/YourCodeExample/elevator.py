@@ -23,8 +23,8 @@ class Elevator(QWidget):
         self.weightLimit: int = 800
         self.maxPeopleNum: int = 10
         # Door related variables
-        self.__doorOpenTime: float = 3.2
-        self.__doorCloseTime: float = 3.2
+        self.__doorOpenTime: float = 1.0
+        self.__doorCloseTime: float = 1.0
         self.__elevatorWaitTime: float = 3.2
         self.__doorSpeed: float = 0.1
         self.__doorInterval: float = 0.0
@@ -34,18 +34,13 @@ class Elevator(QWidget):
         self.currentState: State = State.stopped_door_closed
         # Init Ui
         self.setupUi()
-
-        # Start timer (loop)
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update)
-        self.timer.start(100) # 0.1 second
         return
 
     def reset(self) -> None:
         # Move related variables
         self.currentPos: float = 1.0 # Initially stop at floor 1
         self.__currentSpeed = 0.1
-        self.currentDirection: Direction = Direction.up # Direction record
+        self.currentDirection: Direction = Direction.wait # Direction record
         self.targetFloor: list[int] = []
         # Weight related variables
         self.__currentWeight: int = 0
@@ -66,8 +61,10 @@ class Elevator(QWidget):
     def move(self) -> None:
         if self.currentState == State.up:
             self.currentPos += self.__currentSpeed
+            self.targetFloor.sort(reverse=False)
         elif self.currentState == State.down:
             self.currentPos -= self.__currentSpeed
+            self.targetFloor.sort(reverse=True)
 
         # Check if the elevator has reached the target floor
         if self.currentPos > self.targetFloor[0]-0.01 and self.currentPos < self.targetFloor[0]+0.01:
@@ -80,8 +77,9 @@ class Elevator(QWidget):
             self.clear_floor_ui(arrivedFloor)
             self.currentState = State.stopped_opening_door
             if len(self.targetFloor) == 0:
+                print("direction reset to wait")
                 self.currentDirection = Direction.wait
-            pass
+            
         return
 
     def openingDoor(self) -> None:
@@ -162,18 +160,15 @@ class Elevator(QWidget):
         # If there is a target floor, begin to move
         if self.targetFloor[0] > self.currentPos:
             self.currentState = State.up
-            self.currentDirection = Direction.up
             self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         elif self.targetFloor[0] < self.currentPos:
             self.currentState = State.down
-            self.currentDirection = Direction.down
             self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         elif self.targetFloor[0] == self.currentPos:
             self.targetFloor.remove(int(self.currentPos))
-            self.clear_floor_ui(int(self.currentPos))
+            self.clear_floor_ui(floor=int(self.currentPos))
             # self.floorArrivedMessage(State.up,self.getCurrentFloor(),self.elevatorId)
             self.currentState = State.stopped_opening_door
-            self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         return True   
     def checkOpenDoor(self) -> None:
         if self.__doorOpenFlag:
@@ -193,10 +188,15 @@ class Elevator(QWidget):
             
 # Utility Functions for controller & button panel inside this elevator
     # Reveive outer request from controller
-    def addTargetFloor(self, floor: int) -> None:
+    def addTargetFloor(self, floor: int) -> str:
         if floor in self.targetFloor:
-            return 
-        # Determine the direction of the elevator when adding the target floor
+            return "Already in the list"
+        # Determine the direction of the elevator when adding the first target floor
+        if self.currentDirection == Direction.wait:
+            if(self.currentPos < floor):
+                self.currentDirection = Direction.up # up
+            elif(self.currentPos > floor): # down
+                self.currentDirection = Direction.down
         self.targetFloor.append(floor)
         self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         print("current target floor: ",self.targetFloor)
@@ -294,34 +294,41 @@ class Elevator(QWidget):
         self.label.setText(_translate("InsideWidget", "E#" + str(self.elevatorId)))
     # button click event
     def on_f1_clicked(self):
+        print("f1 clicked")
         if self.f1_activeFlag:
             return
         else:
-            self.f1_activeFlag = True
-            self.floorbutton_clicked(self.f1,1)
+            if self.floorbutton_clicked(self.f1,1):
+                self.f1_activeFlag = True
     def on_f2_clicked(self):
-        if self.f2_activeFlag:
+        print("f2 clicked")
+        if self.f2_activeFlag :
+            print("early return!!!!!")
             return
         else:
-            self.f2_activeFlag = True
-            self.floorbutton_clicked(self.f2,2)
+            if self.floorbutton_clicked(self.f2,2):
+                self.f2_activeFlag = True
     def on_f3_clicked(self):
+        print("f3 clicked")
         if self.f3_activeFlag:
+            print("early return!!!!!")
             return
         else:
-            self.f3_activeFlag = True
-            self.floorbutton_clicked(self.f3,3)
-    def floorbutton_clicked(self,button:QtWidgets.QPushButton,floor:int):
+            if self.floorbutton_clicked(self.f3,3):
+                self.f3_activeFlag = True
+    def floorbutton_clicked(self,button:QtWidgets.QPushButton,floor:int)->bool: 
         if(self.currentPos < floor):
                 direction = Direction.up # up
         elif(self.currentPos > floor): # down
                 direction = Direction.down
         else:
             direction = Direction.wait # same
-        # 这个电梯方向相同或方向状态不存在，插入target priority queue
         if self.currentDirection == direction or self.currentDirection == Direction.wait:
             button.setStyleSheet("background-color: yellow;")
             self.addTargetFloor(floor) # 如果电梯向上，从小到大[2,3],反之[2,1]
+            return True
+        else:
+            return False
     def resetUi(self):
         self.f1_activeFlag = False
         self.f2_activeFlag = False
@@ -331,6 +338,12 @@ class Elevator(QWidget):
         self.f3.setStyleSheet("background-color: none;")
     def updateUi(self):
         self.set_lcd_value(self.getCurrentFloor())
+        if self.currentDirection == Direction.up:
+            self.label.setText("up " + str(self.targetFloor))
+        elif self.currentDirection == Direction.down:
+            self.label.setText("down" + str(self.targetFloor))
+        elif self.currentDirection == Direction.wait:
+            self.label.setText("wait" + str(self.targetFloor))
     # When a target floor arrives, clear the button
     def clear_floor_ui(self,floor:int):
         if floor == 1:
