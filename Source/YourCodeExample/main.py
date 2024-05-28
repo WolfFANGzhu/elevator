@@ -47,8 +47,8 @@ if __name__=='__main__':
     temp_msg = ""
     
     app = QApplication(sys.argv)
-    e1 = Elevator(1,zmqThread,[0,0],[0,0])
-    e2 = Elevator(2,zmqThread,[0,0],[0,0])
+    e1 = Elevator(1,zmqThread)
+    e2 = Elevator(2,zmqThread)
     # window 1~3 are the windows for the outside panel 
     window1 = QtWidgets.QWidget()
     window2 = QtWidgets.QWidget()
@@ -63,7 +63,7 @@ if __name__=='__main__':
         button = info["button"]
         state = info["state"]
         elevator_id = info["elevatorId"]
-        print(f"Button Name: {button_name}, State: {state}, Elevator ID: {elevator_id}")
+    print(f"Button Name: {button_name}, State: {state}, Elevator ID: {elevator_id}")
     window1.show()
     window2.show()
     window3.show()
