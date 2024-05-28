@@ -57,6 +57,13 @@ if __name__=='__main__':
     controller.create_window(window1,"First Floor", up=True, down=False)
     controller.create_window(window2,"Second Floor", up=True, down=True)
     controller.create_window(window3,"Third Floor", up=False, down=True)
+    controller.create_button_dict()
+    controller.connect()
+    for button_name, info in controller.button_dict.items():
+        button = info["button"]
+        state = info["state"]
+        elevator_id = info["elevatorId"]
+        print(f"Button Name: {button_name}, State: {state}, Elevator ID: {elevator_id}")
     window1.show()
     window2.show()
     window3.show()

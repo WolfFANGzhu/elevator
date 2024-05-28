@@ -56,8 +56,6 @@ class ElevatorController():
                 self.elevators[eid].targetFloor.append(floor)
                 return
 
-            # 都没有，等待出现这个情况，加入等待队列，每一个update查询一遍
-            self.msgQueue.append(command)
             pass
         elif action == "call_down":
             floor = int(command_parts[1])
@@ -126,10 +124,31 @@ class ElevatorController():
         else:
             return -1
     def update(self,msg:str) -> None:
-        if len(self.msgQueue) > 0:
-            self.parseInput(self.msgQueue.pop(0))
+        self.updateLCD()
         if msg != "":
             self.parseInput(msg)
+        for button_name, info in self.button_dict.items():
+            button = info["button"]
+            state = info["state"]
+            elevator_id = info["elevatorId"]
+            floor = info["floor"]
+            if state == "pressed":
+                # Get the same floor elevator
+                eid = self.getNearestStopElevator(floor)
+                if eid != -1:
+                    # Assign the task
+                    self.elevators[eid].addTargetFloor(floor)
+                    self.button_dict[button_name]["state"] = "waiting"
+                    self.button_dict[button_name]["elevatorId"] = eid
+                pass
+            if state == "waiting":
+                # Check is the elevator that the button is waiting has arrived.
+                if self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01:
+                    self.button_dict[button_name]["state"] = "not pressed"
+                    self.button_dict[button_name]["elevatorId"] = -1
+                    button.setStyleSheet("background-color: none;")
+                
+            
         return
     
 
@@ -169,12 +188,63 @@ class ElevatorController():
 
         self.outPanels.append(controls)
 
-        # Connect the button to the elevator controller
-        def on_1_up_clicked():
-            return
-        def on_2_up_clicked(): 
-            return
-        def on_2_down_clicked():
-            return
-        def on_3_down_clicked():
-            return
+    def create_button_dict(self):
+        self.button_dict = {
+            "1_up": {
+                "button": self.outPanels[0]['up'],
+                "state": "not pressed", # not pressed / pressed / waiting
+                "elevatorId": -1,
+                "floor": 1
+            },
+            "2_up": {
+                "button": self.outPanels[1]['up'],
+                "state": "not pressed",
+                "elevatorId": -1,
+                "floor": 2
+            },
+            "2_down": {
+                "button": self.outPanels[1]['down'],
+                "state": "not pressed",
+                "elevatorId": -1,
+                "floor": 2
+            },
+            "3_down": {
+                "button": self.outPanels[2]['down'],
+                "state": "not pressed",
+                "elevatorId": -1,
+                "floor": 3
+            }
+        }
+
+    
+    # Connect the button to the elevator controller
+    def connect(self):
+        self.button_dict["1_up"]["button"].clicked.connect(self.on_1_up_clicked)
+        self.button_dict["2_up"]["button"].clicked.connect(self.on_2_up_clicked)
+        self.button_dict["2_down"]["button"].clicked.connect(self.on_2_down_clicked)
+        self.button_dict["3_down"]["button"].clicked.connect(self.on_3_down_clicked)
+    def on_1_up_clicked(self):
+        if self.button_dict["1_up"]["state"] == "not pressed":
+            self.button_dict["1_up"]["button"].setStyleSheet("background-color: yellow;")
+            self.button_dict["1_up"]["state"] = "pressed"
+        return
+    def on_2_up_clicked(self): 
+        if self.button_dict["2_up"]["state"] == "not pressed":
+            self.button_dict["2_up"]["button"].setStyleSheet("background-color: yellow;")
+            self.button_dict["2_up"]["state"] = "pressed"
+        return
+    def on_2_down_clicked(self):
+        if self.button_dict["2_down"]["state"] == "not pressed":
+            self.button_dict["2_down"]["button"].setStyleSheet("background-color: yellow;")
+            self.button_dict["2_down"]["state"] = "pressed"
+        return
+    def on_3_down_clicked(self):
+        if self.button_dict["3_down"]["state"] == "not pressed":
+            self.button_dict["3_down"]["button"].setStyleSheet("background-color: yellow;")
+            self.button_dict["3_down"]["state"] = "pressed"
+        return
+    def updateLCD(self):
+        for i in range(3):
+            self.outPanels[i]['e1'].display(self.elevators[0].getCurrentFloor())
+            self.outPanels[i]['e2'].display(self.elevators[1].getCurrentFloor())
+        return

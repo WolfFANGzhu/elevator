@@ -35,7 +35,7 @@ class Elevator(QWidget):
         # Init Ui
         self.setupUi()
         return
-
+# State transfer functions
     def reset(self) -> None:
         # Move related variables
         self.currentPos: float = 1.0 # Initially stop at floor 1
