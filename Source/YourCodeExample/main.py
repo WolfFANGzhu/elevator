@@ -41,10 +41,12 @@ if __name__=='__main__':
 
 
     ############ Initialize Elevator System ############
-    timeStamp = -1 #Used when receiving new message
-    serverMessage = "" #Used when receiving new message
-    messageUnprocessed = False #Used when receiving new message 
-    temp_msg = ""
+    status = {
+        'timeStamp': -1,  # Used when receiving new message
+        'serverMessage': "",  # Used when receiving new message
+        'messageUnprocessed': False,  # Used when receiving new message
+        'temp_msg': ""
+    }
     
     app = QApplication(sys.argv)
     e1 = Elevator(1,zmqThread)
@@ -69,19 +71,19 @@ if __name__=='__main__':
     window3.show()
     e1.show()
     e2.show()
-    def update(timeStamp,serverMessage,messageUnprocessed):
-        if(is_received_new_message(timeStamp,serverMessage,messageUnprocessed)):
-            timeStamp = zmqThread.messageTimeStamp
-            serverMessage = zmqThread.receivedMessage
-            temp_msg = serverMessage
+    def update(status):
+        if(is_received_new_message(status["timeStamp"],status["serverMessage"],status["messageUnprocessed"])):
+            status["timeStamp"] = zmqThread.messageTimeStamp
+            status["serverMessage"] = zmqThread.receivedMessage
+            status["temp_msg"] = status["serverMessage"] 
         else:
-            temp_msg = ""
+            status["temp_msg"] = ""
         e1.update()
         e2.update()
-        controller.update(temp_msg)
+        controller.update(status["temp_msg"])
     timer = QTimer()
-    timer.timeout.connect(lambda: update(timeStamp, serverMessage, messageUnprocessed))
-    timer.start(100) # 0.1 second
+    timer.timeout.connect(lambda: update(status))
+    timer.start(500) # 0.5 second
     sys.exit(app.exec_())
 
             

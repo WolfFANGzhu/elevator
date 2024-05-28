@@ -4,6 +4,8 @@ from direction import Direction
 import NetClient
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QWidget
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
 # Elevator Controller
 # This class is responsible for 
 # 1. Parsing the command from the server
@@ -15,78 +17,60 @@ class ElevatorController():
     def __init__(self,zmqThread:NetClient.ZmqClientThread,elevator1,elevator2) -> None:
         # Initialize two elevators
         self.elevators: list[Elevator] = []
-        # Button Panel Outside the Elevator
-        self.upTask = [0,0] # 0 means up@1, 1 means up@2
-        self.downTask = [0,0] # 0 means down@2, 1 means down@3
-        self.msgQueue:list[str] = []
         self.elevators.append(elevator1)
         self.elevators.append(elevator2)
         self.outPanels:list[dict] = []
+        # Client to send msg to server
+        self.zmqThread = zmqThread
     def parseInput(self, command: str) -> None:
-        # Parse the command from server
         """
-        open_door
-        close_door
+        open_door#1: open the door of elevator 1
+        close_door#1: close the door of elevator 1
         call_up: ["-1", "1", "2"], //For example, call_up@1 means a user on the first floor presses the button to call the elevator to go upwards.
         call_down: ["3", "2", "1"], //For instance, call_down@3 signifies a user on the third floor pressing the button to call the elevator to go downwards.
         select_floor: ["-1#1", "-1#2", "1#1", "1#2", "2#1", "2#2", "3#1", "3#2"], //For example, select_floor@2#1 means a user in elevator #1 selects to go to the second floor.
         reset: When your elevator system receives a reset signal, it should reset the elevator's state machine to its initial state.
         """
-        # Parse the command from server
+        if command == "": return
+        # Parse the command, convert command to clicking button
         command_parts = command.split('@')
         action = command_parts[0]
         if action == "open_door#1":
+            QTest.mouseClick(self.elevators[0].open, Qt.LeftButton)
             pass
         elif action == "open_door#2":
+            QTest.mouseClick(self.elevators[1].open, Qt.LeftButton)
             pass
         elif action == "close_door#1":
+            QTest.mouseClick(self.elevators[0].close, Qt.LeftButton)
             pass
         elif action == "close_door#2":
+            QTest.mouseClick(self.elevators[1].close, Qt.LeftButton)
             pass
         elif action == "call_up":
-            # Basic logic is find an elevator is available and assign the task
-            # Difficulty is that we dont know the potential direction the elevator is moving towards?
             floor = int(command_parts[1])
-            # Intialize an empty var
-            eid = -1
-            # Very basic operation: find the nearest idle elevator to respond to request
-            eid = self.getNearestStopElevator(floor)
-
-            if eid != -1:
-                self.elevators[eid].targetFloor.append(floor)
-                return
-
+            if floor == 1:
+                QTest.mouseClick(self.button_dict["1_up"]["button"], Qt.LeftButton)
+            elif floor == 2:
+                QTest.mouseClick(self.button_dict["2_up"]["button"], Qt.LeftButton)
             pass
         elif action == "call_down":
             floor = int(command_parts[1])
-            eid = -1
-            # 先找空闲电梯离自己最近的一层的
-            eid = self.getNearestStopElevator(floor)
-            if(eid != -1):
-                # Assign task
-                self.elevators[eid].addTargetFloor(floor)
-                return
-            # # 都没有，等待出现这个情况，加入等待队列，每一个update查询一遍
-            self.msgQueue.append(command)
+            if floor == 2:
+                QTest.mouseClick(self.button_dict["2_down"]["button"], Qt.LeftButton)
+            elif floor == 3:
+                QTest.mouseClick(self.button_dict["3_down"]["button"], Qt.LeftButton)
             pass
         elif action == "select_floor":
             floor,eid = command_parts[1].split('#')
             eid = int(eid)-1
             floor = int(floor)
-            print("user select in elevator#",eid+1, " floor",floor)
-            elevator:Elevator = self.elevators[eid]
-            # calculate direction by this command
-            if(elevator.currentPos < floor):
-                direction = Direction.up # up
-            elif(elevator.currentPos > floor): # down
-                direction = Direction.down
-            else:
-                direction = Direction.wait # same
-            # 这个电梯方向相同或方向状态不存在，插入target priority queue
-            if elevator.currentDirection == direction or elevator.currentDirection == Direction.wait:
-                elevator.addTargetFloor(floor) # 如果电梯向上，从小到大[2,3],反之[2,1]
-            
-            # 暂时不考虑用户选的方向相反这种情况
+            if floor == 1:
+                QTest.mouseClick(self.elevators[eid].f1, Qt.LeftButton)
+            elif floor == 2:
+                QTest.mouseClick(self.elevators[eid].f2, Qt.LeftButton)
+            elif floor == 3:
+                QTest.mouseClick(self.elevators[eid].f3, Qt.LeftButton)
             pass
         elif action == "reset":
             self.reset()
@@ -107,22 +91,6 @@ class ElevatorController():
             return -1
         min_index = dist.index(min(dist))
         return min_index
-    def getUpElevator(self, floor: int) -> int:
-        # 找到相同方向的电梯便于2层向上搭便车
-        if self.elevators[0].currentState == State.up and self.elevators[0].currentPos < floor:
-            return 0
-        elif self.elevators[1].currentState == State.up and self.elevators[1].currentPos < floor:
-            return 1
-        else:
-            return -1
-    def getDownElevator(self, floor: int) -> int:
-        # 找到相同方向的电梯便于2层向下搭便车
-        if self.elevators[0].currentState == State.down and self.elevators[0].currentPos > floor:
-            return 0
-        elif self.elevators[1].currentState == State.down and self.elevators[1].currentPos > floor:
-            return 1
-        else:
-            return -1
     def update(self,msg:str) -> None:
         self.updateLCD()
         if msg != "":
@@ -132,8 +100,9 @@ class ElevatorController():
             state = info["state"]
             elevator_id = info["elevatorId"]
             floor = info["floor"]
+            direction = info["direction"]
             # Release control of the elevator if the elevator has left the floor
-            if elevator_id != -1:
+            if elevator_id != -1 and state == "not pressed":
                 if not (self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01):
                     self.button_dict[button_name]["elevatorId"] = -1
             if state == "pressed":
@@ -142,6 +111,7 @@ class ElevatorController():
                     # just open the door.
                     self.elevators[elevator_id].setOpenDoorFlag()
                     self.button_dict[button_name]["state"] = "not pressed"
+                    self.floorArrivedMessage(direction,floor,elevator_id)
                     button.setStyleSheet("background-color: none;")
                 else:
                     # Get an available elevator
@@ -156,13 +126,22 @@ class ElevatorController():
                 # Check is the elevator that the button is waiting has arrived.
                 if self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01:
                     self.button_dict[button_name]["state"] = "not pressed"
+                    self.floorArrivedMessage(direction,floor,elevator_id)
                     # do not release the control of that elevator until that elevator actually leaves that floor
                     # self.button_dict[button_name]["elevatorId"] = -1
                     button.setStyleSheet("background-color: none;")
                 
             
         return
-    
+    def floorArrivedMessage(self, direction:str,floor: int, eid: int) -> None:
+        floors = ["-1", "1", "2", "3"]
+        elevators = ["#1", "#2"]
+        floor_str = floors[floor]
+        elevator_str = elevators[eid]
+
+        message = f"{direction}_floor_arrived@{floor_str}{elevator_str}"
+        print(message)
+        self.zmqThread.sendMsg(message)
 
 ############## UI Related Code ##############
     def create_window(self, window:QWidget,title, up, down):
@@ -206,25 +185,29 @@ class ElevatorController():
                 "button": self.outPanels[0]['up'],
                 "state": "not pressed", # not pressed / pressed / waiting
                 "elevatorId": -1,
-                "floor": 1
+                "floor": 1,
+                "direction": "up"
             },
             "2_up": {
                 "button": self.outPanels[1]['up'],
                 "state": "not pressed",
                 "elevatorId": -1,
-                "floor": 2
+                "floor": 2,
+                "direction": "up"
             },
             "2_down": {
                 "button": self.outPanels[1]['down'],
                 "state": "not pressed",
                 "elevatorId": -1,
-                "floor": 2
+                "floor": 2,
+                "direction": "down"
             },
             "3_down": {
                 "button": self.outPanels[2]['down'],
                 "state": "not pressed",
                 "elevatorId": -1,
-                "floor": 3
+                "floor": 3,
+                "direction": "down"
             }
         }
 

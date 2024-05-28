@@ -15,6 +15,7 @@ class Elevator(QWidget):
         self.currentPos: float = 1.0 # Initially stop at floor 1
         self.__currentSpeed = 0.1
         self.currentDirection: Direction = Direction.wait # Direction record
+        self.taskDirection: Direction = Direction.up # Task direction assigned by controller(outside panel)
         self.targetFloor: list[int] = []
         # Weight related variables
         self.__currentWeight: int = 0
@@ -69,7 +70,7 @@ class Elevator(QWidget):
             # Arrive! transfer state to stopped_door_opening
             arrivedFloor = self.targetFloor.pop(0)
             self.currentPos = float(arrivedFloor)
-            # self.floorArrivedMessage(self.currentState,arrivedFloor,self.elevatorId)
+            self.floorArrivedMessage(arrivedFloor,self.elevatorId)
             print("elevator: ",self.elevatorId," arrived at floor: ",arrivedFloor)
             # Clear floor ui
             self.clear_floor_ui(arrivedFloor)
@@ -90,7 +91,7 @@ class Elevator(QWidget):
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__doorOpenTime:
             self.__doorInterval = 0.0
-            # self.doorOpenedMessage(self.elevatorId)
+            self.doorOpenedMessage(self.elevatorId)
             self.currentState = State.stopped_door_opened
         return
     def closingDoor(self) -> None:
@@ -107,7 +108,7 @@ class Elevator(QWidget):
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__doorCloseTime:
             self.__doorInterval = 0.0
-            # self.doorClosedMessage(self.elevatorId)
+            self.doorClosedMessage(self.elevatorId)
             self.currentState = State.stopped_door_closed
         return
 
@@ -129,17 +130,17 @@ class Elevator(QWidget):
         return
     
 # Sending Msg
-    def floorArrivedMessage(self,state: State, floor: int, eid: int) -> None:
-        print("floor arrived message",state,floor,eid)
+    def floorArrivedMessage(self, floor: int, eid: int) -> None:
         directions = ["up", "down", ""]
         floors = ["-1", "1", "2", "3"]
         elevators = ["#1", "#2"]
 
-        direction_str = directions[state.value]
+        direction_str = directions[self.currentDirection.value]
         floor_str = floors[floor]
         elevator_str = elevators[eid - 1]  # Adjusting elevator index to start from 1
 
-        message = f"{direction_str}_floor_arrived@{floor_str}{elevator_str}"
+        message = f"floor_arrived@{floor_str}{elevator_str}"
+        print(message)
         self.zmqThread.sendMsg(message)
     def doorOpenedMessage(self,eid: int) -> None:
         elevators = ["#1", "#2"]
@@ -165,7 +166,7 @@ class Elevator(QWidget):
         elif self.targetFloor[0] == self.currentPos:
             self.targetFloor.remove(int(self.currentPos))
             self.clear_floor_ui(floor=int(self.currentPos))
-            # self.floorArrivedMessage(State.up,self.getCurrentFloor(),self.elevatorId)
+            self.floorArrivedMessage(self.getCurrentFloor(),self.elevatorId)
             self.currentState = State.stopped_opening_door
         return True   
     def checkOpenDoor(self) -> None:
