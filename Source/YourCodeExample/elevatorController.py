@@ -132,20 +132,32 @@ class ElevatorController():
             state = info["state"]
             elevator_id = info["elevatorId"]
             floor = info["floor"]
+            # Release control of the elevator if the elevator has left the floor
+            if elevator_id != -1:
+                if not (self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01):
+                    self.button_dict[button_name]["elevatorId"] = -1
             if state == "pressed":
-                # Get the same floor elevator
-                eid = self.getNearestStopElevator(floor)
-                if eid != -1:
-                    # Assign the task
-                    self.elevators[eid].addTargetFloor(floor)
-                    self.button_dict[button_name]["state"] = "waiting"
-                    self.button_dict[button_name]["elevatorId"] = eid
+                # first check if the button still has control of specific elevator
+                if elevator_id != -1:
+                    # just open the door.
+                    self.elevators[elevator_id].setOpenDoorFlag()
+                    self.button_dict[button_name]["state"] = "not pressed"
+                    button.setStyleSheet("background-color: none;")
+                else:
+                    # Get an available elevator
+                    eid = self.getNearestStopElevator(floor)
+                    if eid != -1:
+                        # Assign the task
+                        self.elevators[eid].addTargetFloor(floor)
+                        self.button_dict[button_name]["state"] = "waiting"
+                        self.button_dict[button_name]["elevatorId"] = eid
                 pass
             if state == "waiting":
                 # Check is the elevator that the button is waiting has arrived.
                 if self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01:
                     self.button_dict[button_name]["state"] = "not pressed"
-                    self.button_dict[button_name]["elevatorId"] = -1
+                    # do not release the control of that elevator until that elevator actually leaves that floor
+                    # self.button_dict[button_name]["elevatorId"] = -1
                     button.setStyleSheet("background-color: none;")
                 
             

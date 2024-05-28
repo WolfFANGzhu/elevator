@@ -7,7 +7,7 @@ import NetClient
 # Elevator
 class Elevator(QWidget):
 
-    def __init__(self,elevatorId:int,zmqThread:NetClient.ZmqClientThread,upTask,downTask) -> None:
+    def __init__(self,elevatorId:int,zmqThread:NetClient.ZmqClientThread) -> None:
         super().__init__()
         self.elevatorId = elevatorId
         self.zmqThread = zmqThread
@@ -16,8 +16,6 @@ class Elevator(QWidget):
         self.__currentSpeed = 0.1
         self.currentDirection: Direction = Direction.wait # Direction record
         self.targetFloor: list[int] = []
-        self.upTask = upTask
-        self.downTask = downTask
         # Weight related variables
         self.__currentWeight: int = 0
         self.weightLimit: int = 800
