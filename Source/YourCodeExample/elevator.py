@@ -24,7 +24,7 @@ class Elevator(QWidget):
         # Door related variables
         self.__doorOpenTime: float = 1.0
         self.__doorCloseTime: float = 1.0
-        self.__elevatorWaitTime: float = 3.2
+        self.__elevatorWaitTime: float = 10.0
         self.__doorSpeed: float = 0.1
         self.__doorInterval: float = 0.0
         self.__doorOpenFlag: bool = False
@@ -36,19 +36,19 @@ class Elevator(QWidget):
         return
 # State transfer functions
     def reset(self) -> None:
-        # Move related variables
         self.currentPos: float = 1.0 # Initially stop at floor 1
         self.__currentSpeed = 0.1
         self.currentDirection: Direction = Direction.wait # Direction record
+        self.taskDirection: Direction = Direction.up # Task direction assigned by controller(outside panel)
         self.targetFloor: list[int] = []
         # Weight related variables
         self.__currentWeight: int = 0
         self.weightLimit: int = 800
         self.maxPeopleNum: int = 10
         # Door related variables
-        self.__doorOpenTime: float = 0.4
-        self.__doorCloseTime: float = 0.4
-        self.__elevatorWaitTime: int = 1.0
+        self.__doorOpenTime: float = 1.0
+        self.__doorCloseTime: float = 1.0
+        self.__elevatorWaitTime: float = 10.0
         self.__doorSpeed: float = 0.1
         self.__doorInterval: float = 0.0
         self.__doorOpenFlag: bool = False
@@ -211,7 +211,16 @@ class Elevator(QWidget):
     def setCloseDoorFlag(self) -> None:
         self.__doorCloseFlag = True
         return
-    
+    def getDoorPercentage(self) -> float:
+        # opened -> 1.0; closed -> 0.0
+        if self.currentState == State.stopped_closing_door:
+            return 1.0 - self.__doorInterval/self.__doorCloseTime
+        elif self.currentState == State.stopped_opening_door:
+            return self.__doorInterval/self.__doorOpenTime
+        elif self.currentState == State.stopped_door_opened:
+            return 1.0
+        else:
+            return 0.0
     def update(self) -> None:
         self.updateUi()
         if self.currentState == State.up or self.currentState == State.down:
@@ -240,7 +249,7 @@ class Elevator(QWidget):
     """UI Related functions"""
     def setupUi(self):
         self.setObjectName("InsideWidget")
-        self.resize(222, 289)
+        self.setGeometry(500+self.elevatorId*300,100,222,289)
 
         layout = QtWidgets.QVBoxLayout(self)
         self.label = QtWidgets.QLabel("E#" + str(self.elevatorId))

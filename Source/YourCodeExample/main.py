@@ -54,11 +54,13 @@ if __name__=='__main__':
     # window 1~3 are the windows for the outside panel 
     window1 = QtWidgets.QWidget()
     window2 = QtWidgets.QWidget()
-    window3 = QtWidgets.QWidget()   
+    window3 = QtWidgets.QWidget()  
+    simulation_window = QtWidgets.QWidget() 
     controller = ElevatorController(zmqThread,e1,e2)
-    controller.create_window(window1,"First Floor", up=True, down=False)
-    controller.create_window(window2,"Second Floor", up=True, down=True)
-    controller.create_window(window3,"Third Floor", up=False, down=True)
+    controller.create_window(window1,"f1", up=True, down=False)
+    controller.create_window(window2,"f2", up=True, down=True)
+    controller.create_window(window3,"f3", up=False, down=True)
+    controller.create_simulation_window(simulation_window)
     controller.create_button_dict()
     controller.connect()
     for button_name, info in controller.button_dict.items():
@@ -69,6 +71,7 @@ if __name__=='__main__':
     window1.show()
     window2.show()
     window3.show()
+    simulation_window.show()
     e1.show()
     e2.show()
     def update(status):

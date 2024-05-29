@@ -1,11 +1,13 @@
 from elevator import Elevator
 from elevatorState import State
-from direction import Direction
 import NetClient
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox,QWidget
+from PyQt5 import  QtWidgets
+from PyQt5.QtWidgets import QWidget
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsRectItem
+from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtGui import QBrush,QColor
 # Elevator Controller
 # This class is responsible for 
 # 1. Parsing the command from the server
@@ -93,6 +95,7 @@ class ElevatorController():
         return min_index
     def update(self,msg:str) -> None:
         self.updateLCD()
+        self.update_simulation_window()
         if msg != "":
             self.parseInput(msg)
         for button_name, info in self.button_dict.items():
@@ -101,6 +104,7 @@ class ElevatorController():
             elevator_id = info["elevatorId"]
             floor = info["floor"]
             direction = info["direction"]
+            count = info["count"]
             # Release control of the elevator if the elevator has left the floor
             if elevator_id != -1 and state == "not pressed":
                 if not (self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01):
@@ -111,7 +115,8 @@ class ElevatorController():
                     # just open the door.
                     self.elevators[elevator_id].setOpenDoorFlag()
                     self.button_dict[button_name]["state"] = "not pressed"
-                    self.floorArrivedMessage(direction,floor,elevator_id)
+                    self.floorArrivedMessage(direction,floor,elevator_id,count)
+                    self.button_dict[button_name]["count"] = 0
                     button.setStyleSheet("background-color: none;")
                 else:
                     # Get an available elevator
@@ -126,14 +131,15 @@ class ElevatorController():
                 # Check is the elevator that the button is waiting has arrived.
                 if self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01:
                     self.button_dict[button_name]["state"] = "not pressed"
-                    self.floorArrivedMessage(direction,floor,elevator_id)
+                    self.floorArrivedMessage(direction,floor,elevator_id,count)
+                    self.button_dict[button_name]["count"] = 0
                     # do not release the control of that elevator until that elevator actually leaves that floor
                     # self.button_dict[button_name]["elevatorId"] = -1
                     button.setStyleSheet("background-color: none;")
                 
             
         return
-    def floorArrivedMessage(self, direction:str,floor: int, eid: int) -> None:
+    def floorArrivedMessage(self, direction:str,floor: int, eid: int,count:int) -> None:
         floors = ["-1", "1", "2", "3"]
         elevators = ["#1", "#2"]
         floor_str = floors[floor]
@@ -141,11 +147,18 @@ class ElevatorController():
 
         message = f"{direction}_floor_arrived@{floor_str}{elevator_str}"
         print(message)
-        self.zmqThread.sendMsg(message)
+        for _ in range(count):
+            self.zmqThread.sendMsg(message)
 
 ############## UI Related Code ##############
     def create_window(self, window:QWidget,title, up, down):
         verticalLayout = QtWidgets.QVBoxLayout(window)
+        if title == "f1":
+            window.setGeometry(500,500,250,150)
+        elif title == "f2": 
+            window.setGeometry(500,300,250,150)
+        elif title == "f3":
+            window.setGeometry(500,100,250,150)
         window.resize(250, 150)
         controls = {}
 
@@ -186,32 +199,112 @@ class ElevatorController():
                 "state": "not pressed", # not pressed / pressed / waiting
                 "elevatorId": -1,
                 "floor": 1,
-                "direction": "up"
+                "direction": "up",
+                "count": 0
             },
             "2_up": {
                 "button": self.outPanels[1]['up'],
                 "state": "not pressed",
                 "elevatorId": -1,
                 "floor": 2,
-                "direction": "up"
+                "direction": "up",
+                "count": 0
             },
             "2_down": {
                 "button": self.outPanels[1]['down'],
                 "state": "not pressed",
                 "elevatorId": -1,
                 "floor": 2,
-                "direction": "down"
+                "direction": "down",
+                "count": 0
             },
             "3_down": {
                 "button": self.outPanels[2]['down'],
                 "state": "not pressed",
                 "elevatorId": -1,
                 "floor": 3,
-                "direction": "down"
+                "direction": "down",
+                "count": 0
             }
         }
 
-    
+    def create_simulation_window(self,window:QWidget):
+        width = 300
+        height = 400
+        window.setWindowTitle('Elevator Simulation')
+        window.setGeometry(100, 100, width,height)
+        layout = QVBoxLayout()
+        
+        scene = QGraphicsScene()
+        view = QGraphicsView(scene)
+        
+        # Define elevator parameters
+        elevator_width = width / 4
+        elevator_height = height * 0.125
+        door_width = elevator_width / 2
+        
+
+        # Floor position
+        floor_mult = [1/8,4/8,7/8]
+        for mult in floor_mult:
+            floor_left = QGraphicsRectItem(width / 8, mult * height, elevator_width, elevator_height)
+            floor_right = QGraphicsRectItem(5*width / 8, mult * height, elevator_width, elevator_height)
+            scene.addItem(floor_left)
+            scene.addItem(floor_right)
+        # Left Elevator
+        left_elevator_x = width / 8
+        left_elevator_y = 7*height /8
+        left_elevator_rect = QRectF(left_elevator_x, left_elevator_y, elevator_width, elevator_height)
+        
+        # Left Elevator Doors
+        left_door1 = QGraphicsRectItem(left_elevator_x, left_elevator_y, door_width, elevator_height)
+        left_door2 = QGraphicsRectItem(left_elevator_x + door_width, left_elevator_y, door_width, elevator_height)
+        
+        # Right Elevator
+        right_elevator_x = 5 * width / 8
+        right_elevator_y = 7* height / 8
+        right_elevator_rect = QRectF(right_elevator_x, right_elevator_y, elevator_width, elevator_height)
+        
+        # Right Elevator Doors
+        right_door1 = QGraphicsRectItem(right_elevator_x, right_elevator_y, door_width, elevator_height)
+        right_door2 = QGraphicsRectItem(right_elevator_x + door_width, right_elevator_y, door_width, elevator_height)
+        # right_door1.setPos(right_door1.pos().x(), right_door1.pos().y()-100)
+        # Set colors for doors
+        left_door1.setBrush(QBrush(QColor(200, 200, 200)))
+        left_door2.setBrush(QBrush(QColor(200, 200, 200)))
+        right_door1.setBrush(QBrush(QColor(200, 200, 200)))
+        right_door2.setBrush(QBrush(QColor(200, 200, 200)))
+        
+        # Add doors to scene
+        scene.addItem(left_door1)
+        scene.addItem(left_door2)
+        scene.addItem(right_door1)
+        scene.addItem(right_door2)
+        
+        layout.addWidget(view)
+        window.setLayout(layout)
+        self.simualtion_window = window
+        self.e1_sim_left:QGraphicsRectItem = left_door1
+        self.e1_sim_right:QGraphicsRectItem = left_door2
+        self.e2_sim_left:QGraphicsRectItem = right_door1
+        self.e2_sim_right:QGraphicsRectItem = right_door2
+
+    def posToWin(self,pos:float):
+        return (-3.0*pos/8.0+5.0/4.0)*400.0-350.0
+
+    def update_simulation_window(self):
+        e1_sim_left_x =  0
+        e1_sim_right_x = 0
+        e2_sim_left_x =  0
+        e2_sim_right_x = 0
+        door_width = 1/8 * 300
+        percent_1 = self.elevators[0].getDoorPercentage()
+        percent_2 = self.elevators[1].getDoorPercentage()
+        self.e1_sim_left.setPos(e1_sim_left_x - door_width*percent_1, self.posToWin(self.elevators[0].currentPos))
+        self.e1_sim_right.setPos(e1_sim_right_x + door_width*percent_1, self.posToWin(self.elevators[0].currentPos))
+        self.e2_sim_left.setPos(e2_sim_left_x - door_width*percent_2, self.posToWin(self.elevators[1].currentPos))
+        self.e2_sim_right.setPos(e2_sim_right_x + door_width*percent_2, self.posToWin(self.elevators[1].currentPos))
+        
     # Connect the button to the elevator controller
     def connect(self):
         self.button_dict["1_up"]["button"].clicked.connect(self.on_1_up_clicked)
@@ -219,21 +312,29 @@ class ElevatorController():
         self.button_dict["2_down"]["button"].clicked.connect(self.on_2_down_clicked)
         self.button_dict["3_down"]["button"].clicked.connect(self.on_3_down_clicked)
     def on_1_up_clicked(self):
+        print("1_up clicked")
+        self.button_dict["1_up"]["count"] += 1
         if self.button_dict["1_up"]["state"] == "not pressed":
             self.button_dict["1_up"]["button"].setStyleSheet("background-color: yellow;")
             self.button_dict["1_up"]["state"] = "pressed"
         return
     def on_2_up_clicked(self): 
+        print("2_up clicked")
+        self.button_dict["2_up"]["count"] += 1
         if self.button_dict["2_up"]["state"] == "not pressed":
             self.button_dict["2_up"]["button"].setStyleSheet("background-color: yellow;")
             self.button_dict["2_up"]["state"] = "pressed"
         return
     def on_2_down_clicked(self):
+        print("2_down clicked")
+        self.button_dict["2_down"]["count"] += 1
         if self.button_dict["2_down"]["state"] == "not pressed":
             self.button_dict["2_down"]["button"].setStyleSheet("background-color: yellow;")
             self.button_dict["2_down"]["state"] = "pressed"
         return
     def on_3_down_clicked(self):
+        print("3_down clicked")
+        self.button_dict["3_down"]["count"] += 1
         if self.button_dict["3_down"]["state"] == "not pressed":
             self.button_dict["3_down"]["button"].setStyleSheet("background-color: yellow;")
             self.button_dict["3_down"]["state"] = "pressed"
@@ -243,3 +344,6 @@ class ElevatorController():
             self.outPanels[i]['e1'].display(self.elevators[0].getCurrentFloor())
             self.outPanels[i]['e2'].display(self.elevators[1].getCurrentFloor())
         return
+    
+if __name__=='__main__':
+    print(ElevatorController("","","").posToWin(3.0))
