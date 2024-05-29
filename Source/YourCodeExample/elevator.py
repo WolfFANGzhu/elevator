@@ -46,9 +46,9 @@ class Elevator(QWidget):
         self.weightLimit: int = 800
         self.maxPeopleNum: int = 10
         # Door related variables
-        self.__doorOpenTime: float = 3.2
-        self.__doorCloseTime: float = 3.2
-        self.__elevatorWaitTime: int = 3.2
+        self.__doorOpenTime: float = 0.4
+        self.__doorCloseTime: float = 0.4
+        self.__elevatorWaitTime: int = 1.0
         self.__doorSpeed: float = 0.1
         self.__doorInterval: float = 0.0
         self.__doorOpenFlag: bool = False
@@ -74,6 +74,7 @@ class Elevator(QWidget):
             print("elevator: ",self.elevatorId," arrived at floor: ",arrivedFloor)
             # Clear floor ui
             self.clear_floor_ui(arrivedFloor)
+            print("door opening #"+str(self.elevatorId))
             self.currentState = State.stopped_opening_door
             if len(self.targetFloor) == 0:
                 print("direction reset to wait")
@@ -91,6 +92,7 @@ class Elevator(QWidget):
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__doorOpenTime:
             self.__doorInterval = 0.0
+            print("door opened #"+str(self.elevatorId))
             self.doorOpenedMessage(self.elevatorId)
             self.currentState = State.stopped_door_opened
         return
@@ -103,11 +105,13 @@ class Elevator(QWidget):
             # If press open button, reopen the door immediately
             self.__doorInterval = self.__doorOpenTime - self.__doorInterval
             self.__doorOpenFlag = False
+            print("door opening #"+str(self.elevatorId))
             self.currentState = State.stopped_opening_door
         # Keep Closing the door
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__doorCloseTime:
             self.__doorInterval = 0.0
+            print("door closed #"+str(self.elevatorId))
             self.doorClosedMessage(self.elevatorId)
             self.currentState = State.stopped_door_closed
         return
@@ -125,6 +129,7 @@ class Elevator(QWidget):
         self.__doorInterval += self.__doorSpeed
         if self.__doorInterval >= self.__elevatorWaitTime:
             self.__doorInterval = 0.0
+            print("door closing #"+str(self.elevatorId))
             self.currentState = State.stopped_closing_door
             
         return
@@ -215,14 +220,11 @@ class Elevator(QWidget):
             pass
         elif self.currentState == State.stopped_opening_door:
             self.openingDoor()
-            print("elevator: ",self.elevatorId," is opening door")
             pass
         elif self.currentState == State.stopped_door_opened:
             self.waitForClosingDoor()
-            print("elevator: ",self.elevatorId," is waiting to close")
             pass
         elif self.currentState == State.stopped_closing_door:
-            print("elevator: ",self.elevatorId," is closing door")
             self.closingDoor()
             pass
         elif self.currentState == State.stopped_door_closed:
@@ -243,6 +245,8 @@ class Elevator(QWidget):
         layout = QtWidgets.QVBoxLayout(self)
         self.label = QtWidgets.QLabel("E#" + str(self.elevatorId))
         layout.addWidget(self.label)
+        self.label2 = QtWidgets.QLabel("State#" + str(self.elevatorId))
+        layout.addWidget(self.label2)
 
         self.LCD = QtWidgets.QLCDNumber()
         self.set_lcd_value(1) # default value is 1
@@ -343,6 +347,19 @@ class Elevator(QWidget):
             self.label.setText("down" + str(self.targetFloor))
         elif self.currentDirection == Direction.wait:
             self.label.setText("wait" + str(self.targetFloor))
+        
+        if self.currentState == State.stopped_door_closed:
+            self.label2.setText("stopped_door_closed")
+        elif self.currentState == State.stopped_door_opened:
+            self.label2.setText("stopped_door_opened")
+        elif self.currentState == State.stopped_opening_door:
+            self.label2.setText("stopped_opening_door")
+        elif self.currentState == State.stopped_closing_door:
+            self.label2.setText("stopped_closing_door")
+        elif self.currentState == State.up:
+            self.label2.setText("up")
+        elif self.currentState == State.down:
+            self.label2.setText("down")
     # When a target floor arrives, clear the button
     def clear_floor_ui(self,floor:int):
         if floor == 1:
