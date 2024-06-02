@@ -60,13 +60,13 @@ class Elevator(QWidget):
             arrivedFloor = self.targetFloor.pop(0)
             self.currentPos = float(arrivedFloor)
             self.floorArrivedMessage(arrivedFloor,self.elevatorId)
-            print("elevator: ",self.elevatorId," arrived at floor: ",arrivedFloor)
+            #print("elevator: ",self.elevatorId," arrived at floor: ",arrivedFloor)
             # Clear floor ui
             self.clear_floor_ui(arrivedFloor)
-            print("door opening #"+str(self.elevatorId))
+            #print("door opening #"+str(self.elevatorId))
             self.currentState = State.stopped_opening_door
             if len(self.targetFloor) == 0:
-                print("direction reset to wait")
+                #print("direction reset to wait")
                 self.currentDirection = Direction.wait
             
         return
@@ -81,7 +81,7 @@ class Elevator(QWidget):
         self.doorInterval += self.doorSpeed
         if self.doorInterval >= Elevator.doorOpenTime:
             self.doorInterval = 0.0
-            print("door opened #"+str(self.elevatorId))
+            #print("door opened #"+str(self.elevatorId))
             self.doorOpenedMessage(self.elevatorId)
             self.currentState = State.stopped_door_opened
         return
@@ -94,13 +94,13 @@ class Elevator(QWidget):
             # If press open button, reopen the door immediately
             self.doorInterval = Elevator.doorOpenTime - self.doorInterval
             self.doorOpenFlag = False
-            print("door opening #"+str(self.elevatorId))
+            #print("door opening #"+str(self.elevatorId))
             self.currentState = State.stopped_opening_door
         # Keep Closing the door
         self.doorInterval += self.doorSpeed
         if self.doorInterval >= Elevator.doorCloseTime:
             self.doorInterval = 0.0
-            print("door closed #"+str(self.elevatorId))
+            #print("door closed #"+str(self.elevatorId))
             self.doorClosedMessage(self.elevatorId)
             self.currentState = State.stopped_door_closed
         return
@@ -118,7 +118,7 @@ class Elevator(QWidget):
         self.doorInterval += self.doorSpeed
         if self.doorInterval >= Elevator.elevatorWaitTime:
             self.doorInterval = 0.0
-            print("door closing #"+str(self.elevatorId))
+            #print("door closing #"+str(self.elevatorId))
             self.currentState = State.stopped_closing_door
             
         return
@@ -134,7 +134,7 @@ class Elevator(QWidget):
         elevator_str = elevators[eid - 1]  # Adjusting elevator index to start from 1
 
         message = f"floor_arrived@{floor_str}{elevator_str}"
-        print(message)
+        #print(message)
         self.zmqThread.sendMsg(message)
     def doorOpenedMessage(self,eid: int) -> None:
         elevators = ["#1", "#2"]
@@ -192,7 +192,7 @@ class Elevator(QWidget):
                 self.currentDirection = Direction.down
         self.targetFloor.append(floor)
         self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
-        print("current target floor: ",self.targetFloor)
+        #print("current target floor: ",self.targetFloor)
         return
     def setOpenDoorFlag(self) -> None:
         self.doorOpenFlag = True
@@ -213,7 +213,7 @@ class Elevator(QWidget):
     def update(self) -> None:
         self.updateUi()
         if self.currentState == State.up or self.currentState == State.down:
-            print("elevator: ",self.elevatorId," is moving",self.currentState.name)
+            #print("elevator: ",self.elevatorId," is moving",self.currentState.name)
             self.move()
             pass
         elif self.currentState == State.stopped_opening_door:
@@ -296,24 +296,24 @@ class Elevator(QWidget):
         self.label.setText(_translate("InsideWidget", "E#" + str(self.elevatorId)))
     # button click event
     def on_f1_clicked(self):
-        print("f1 clicked")
+        #print("f1 clicked")
         if self.f1_activeFlag:
             return
         else:
             if self.floorbutton_clicked(self.f1,1):
                 self.f1_activeFlag = True
     def on_f2_clicked(self):
-        print("f2 clicked")
+        #print("f2 clicked")
         if self.f2_activeFlag :
-            print("early return!!!!!")
+            #print("early return!!!!!")
             return
         else:
             if self.floorbutton_clicked(self.f2,2):
                 self.f2_activeFlag = True
     def on_f3_clicked(self):
-        print("f3 clicked")
+        #print("f3 clicked")
         if self.f3_activeFlag:
-            print("early return!!!!!")
+            #print("early return!!!!!")
             return
         else:
             if self.floorbutton_clicked(self.f3,3):
@@ -374,10 +374,10 @@ class Elevator(QWidget):
         
     def on_open_clicked(self):
         self.setOpenDoorFlag()
-        print("open button is pressed!")
+        #print("open button is pressed!")
     def on_close_clicked(self):
         self.setCloseDoorFlag()
-        print("close button is pressed!")
+        #print("close button is pressed!")
 
     # Other util functions
 
