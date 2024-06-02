@@ -87,7 +87,7 @@ class ElevatorController():
         min_index = -1
         if(self.elevators[0].currentState == State.stopped_door_closed and len(self.elevators[0].targetFloor)==0):
             dist[0] = abs(self.elevators[0].getCurrentFloor() - floor)
-        if(self.elevators[1].currentState == State.stopped_door_closed and len(self.elevators[0].targetFloor)==0):
+        if(self.elevators[1].currentState == State.stopped_door_closed and len(self.elevators[1].targetFloor)==0):
             dist[1] = abs(self.elevators[1].getCurrentFloor() - floor)
         if(dist[0] == 99 and dist[1] == 99):
             return -1
@@ -95,6 +95,7 @@ class ElevatorController():
         return min_index
     def update(self,msg:str) -> None:
         self.updateLCD()
+        self.updateButtonText()
         self.update_simulation_window()
         if msg != "":
             self.parseInput(msg)
@@ -127,7 +128,7 @@ class ElevatorController():
                         self.button_dict[button_name]["state"] = "waiting"
                         self.button_dict[button_name]["elevatorId"] = eid
                 pass
-            if state == "waiting":
+            elif state == "waiting":
                 # Check is the elevator that the button is waiting has arrived.
                 if self.elevators[elevator_id].currentPos > floor-0.01 and self.elevators[elevator_id].currentPos < floor+0.01:
                     self.button_dict[button_name]["state"] = "not pressed"
@@ -345,5 +346,9 @@ class ElevatorController():
             self.outPanels[i]['e2'].display(self.elevators[1].getCurrentFloor())
         return
     
-if __name__=='__main__':
-    print(ElevatorController("","","").posToWin(3.0))
+    # Debug Util Function
+    def updateButtonText(self):
+        for button_name, info in self.button_dict.items():
+            self.button_dict[button_name]["button"].setText(f"{button_name} {info['state']} {info['elevatorId']} {info['count']}")
+# if __name__=='__main__':
+#     print(ElevatorController("","","").posToWin(3.0))

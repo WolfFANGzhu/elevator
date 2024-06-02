@@ -17,10 +17,6 @@ class Elevator(QWidget):
         self.currentDirection: Direction = Direction.wait # Direction record
         self.taskDirection: Direction = Direction.up # Task direction assigned by controller(outside panel)
         self.targetFloor: list[int] = []
-        # Weight related variables
-        self.__currentWeight: int = 0
-        self.weightLimit: int = 800
-        self.maxPeopleNum: int = 10
         # Door related variables
         self.__doorOpenTime: float = 1.0
         self.__doorCloseTime: float = 1.0
@@ -41,10 +37,6 @@ class Elevator(QWidget):
         self.currentDirection: Direction = Direction.wait # Direction record
         self.taskDirection: Direction = Direction.up # Task direction assigned by controller(outside panel)
         self.targetFloor: list[int] = []
-        # Weight related variables
-        self.__currentWeight: int = 0
-        self.weightLimit: int = 800
-        self.maxPeopleNum: int = 10
         # Door related variables
         self.__doorOpenTime: float = 1.0
         self.__doorCloseTime: float = 1.0
@@ -55,6 +47,9 @@ class Elevator(QWidget):
         self.__doorCloseFlag: bool = False
         # State
         self.currentState: State = State.stopped_door_closed
+
+        # Reset UI
+        self.resetUi()
         return
         
     def move(self) -> None:
