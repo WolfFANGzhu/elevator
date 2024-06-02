@@ -106,14 +106,16 @@ class Elevator(QWidget):
         return
 
     def waitForClosingDoor(self) -> None:
+        # Open Flag is on, keep opened
+        if self.doorOpenFlag:
+            self.doorOpenFlag = False
         # Close? transfer state to closing door
         if self.doorCloseFlag:
             self.doorInterval = 0.0
             self.currentState = State.stopped_closing_door
             self.doorCloseFlag = False
-        # Open Flag is on, keep opened
-        if self.doorOpenFlag:
-            self.doorOpenFlag = False
+            return
+
 
         self.doorInterval += self.doorSpeed
         if self.doorInterval >= Elevator.elevatorWaitTime:
@@ -168,11 +170,7 @@ class Elevator(QWidget):
             self.doorOpenFlag = False
             self.currentState = State.stopped_opening_door
         return
-    def clearOutsideButton(self,state: State, floor: int) -> None:
-        if state == State.up:
-            self.upTask[floor-1] = 0
-        elif state == State.down:
-            self.downTask[floor-2] = 0
+
 
 # Util function inside class
     def getCurrentFloor(self) -> int:
