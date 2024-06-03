@@ -44,10 +44,10 @@ class ElevatorController():
             QTest.mouseClick(self.elevators[1].open, Qt.LeftButton)
             pass
         elif action == "close_door#1":
-            QTest.mouseClick(self.elevators[0].close, Qt.LeftButton)
+            QTest.mouseClick(self.elevators[0].closeButton, Qt.LeftButton)
             pass
         elif action == "close_door#2":
-            QTest.mouseClick(self.elevators[1].close, Qt.LeftButton)
+            QTest.mouseClick(self.elevators[1].closeButton, Qt.LeftButton)
             pass
         elif action == "call_up":
             floor = int(command_parts[1])
@@ -80,6 +80,13 @@ class ElevatorController():
     def reset(self) -> None:
         for elevator in self.elevators:
             elevator.reset()
+        # Reset all buyttons
+        for button_name, info in self.button_dict.items():
+            button = info["button"]
+            button.setStyleSheet("background-color: none;")
+            self.button_dict[button_name]["state"] = "not pressed"
+            self.button_dict[button_name]["elevatorId"] = -1
+            self.button_dict[button_name]["count"] = 0
     def getNearestStopElevator(self, floor: int) -> int:
         # find the nearest elevator accrording to the floor that is requesting
         # return index of the elevator; return -1 if no elevator is available
@@ -237,8 +244,9 @@ class ElevatorController():
         layout = QVBoxLayout()
         
         scene = QGraphicsScene()
+        scene.setSceneRect(0, 0, 300, 400)
+        window.setGeometry(100, 100, int(1.1*width),int(1.1*height))
         view = QGraphicsView(scene)
-        
         # Define elevator parameters
         elevator_width = width / 4
         elevator_height = height * 0.125
@@ -289,6 +297,7 @@ class ElevatorController():
         self.e1_sim_right:QGraphicsRectItem = left_door2
         self.e2_sim_left:QGraphicsRectItem = right_door1
         self.e2_sim_right:QGraphicsRectItem = right_door2
+        
 
     def posToWin(self,pos:float):
         return (-3.0*pos/8.0+5.0/4.0)*400.0-350.0
@@ -349,6 +358,6 @@ class ElevatorController():
     # Debug Util Function
     def updateButtonText(self):
         for button_name, info in self.button_dict.items():
-            self.button_dict[button_name]["button"].setText(f"{button_name} {info['state']} {info['elevatorId']} {info['count']}")
+            self.button_dict[button_name]["button"].setText(f"{info['state']} E{info['elevatorId']} Count:{info['count']}")
 # if __name__=='__main__':
 #     print(ElevatorController("","","").posToWin(3.0))
