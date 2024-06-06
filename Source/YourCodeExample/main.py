@@ -75,10 +75,8 @@ if __name__=='__main__':
     e1.show()
     e2.show()
     def update(status):
-        if(is_received_new_message(status["timeStamp"],status["serverMessage"],status["messageUnprocessed"])):
-            status["timeStamp"] = zmqThread.messageTimeStamp
-            status["serverMessage"] = zmqThread.receivedMessage
-            status["temp_msg"] = status["serverMessage"] 
+        if(len(zmqThread.buffer)!=0):
+            status["temp_msg"] = zmqThread.buffer.pop(0)
         else:
             status["temp_msg"] = ""
         e1.update()
@@ -86,7 +84,7 @@ if __name__=='__main__':
         controller.update(status["temp_msg"])
     timer = QTimer()
     timer.timeout.connect(lambda: update(status))
-    timer.start(500) # 0.5 second
+    timer.start(300) # 0.1 second
     sys.exit(app.exec_())
 
             
