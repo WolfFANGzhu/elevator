@@ -6,7 +6,7 @@ from PyQt5.QtCore import QTimer, Qt
 import NetClient
 # Elevator
 class Elevator(QWidget):
-    elevatorWaitTime: float = 10.0
+    elevatorWaitTime: float = 3.0
     doorOpenTime: float = 1.0
     doorCloseTime: float = 1.0
     def __init__(self,elevatorId:int,zmqThread:NetClient.ZmqClientThread) -> None:
@@ -15,7 +15,7 @@ class Elevator(QWidget):
         self.zmqThread = zmqThread
         # Move related variables
         self.currentPos: float = 1.0 # Initially stop at floor 1
-        self.__currentSpeed = 0.1
+        self.__currentSpeed = 0.05
         self.currentDirection: Direction = Direction.wait # Direction record
         self.targetFloor: list[int] = []
         # Door related variables
@@ -181,7 +181,7 @@ class Elevator(QWidget):
     # Reveive outer request from controller
     def addTargetFloor(self, floor: int) -> str:
         if floor in self.targetFloor:
-            return "Already in the list"
+            return "OK"
         # Determine the direction of the elevator when adding the first target floor
         if self.currentDirection == Direction.wait:
             if(self.currentPos < floor):
@@ -191,7 +191,7 @@ class Elevator(QWidget):
         self.targetFloor.append(floor)
         self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
         #print("current target floor: ",self.targetFloor)
-        return
+        return "OK"
     def setOpenDoorFlag(self) -> None:
         self.doorOpenFlag = True
         return
@@ -324,6 +324,8 @@ class Elevator(QWidget):
         else:
             direction = Direction.wait # same
         if self.currentDirection == direction or self.currentDirection == Direction.wait:
+            if self.getCurrentFloor() == floor:
+                return False
             button.setStyleSheet("background-color: yellow;")
             self.addTargetFloor(floor) # 如果电梯向上，从小到大[2,3],反之[2,1]
             return True

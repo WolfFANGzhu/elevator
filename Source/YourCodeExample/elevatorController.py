@@ -1,5 +1,6 @@
 from elevator import Elevator
 from elevatorState import State
+from direction import Direction
 import NetClient
 from PyQt5 import  QtWidgets
 from PyQt5.QtWidgets import QWidget
@@ -100,6 +101,64 @@ class ElevatorController():
             return -1
         min_index = dist.index(min(dist))
         return min_index
+    def getNearestElevatorWithDirect(self,floor,direction:Direction):
+        dist = [99,99]
+        min_index = -1
+        if floor == 2:
+            if direction == Direction.up:
+                if self.elevators[0].currentPos < 2 and self.elevators[0].currentDirection == Direction.up:
+                    dist[0] = abs(self.elevators[0].currentPos - floor)
+                if self.elevators[1].currentPos < 2 and self.elevators[1].currentDirection == Direction.up:
+                    dist[1] = abs(self.elevators[1].currentPos - floor)
+            elif direction == Direction.down:
+                if self.elevators[0].currentPos > 2 and self.elevators[0].currentDirection == Direction.down:
+                    dist[0] = abs(self.elevators[0].currentPos - floor)
+                if self.elevators[1].currentPos > 2 and self.elevators[1].currentDirection == Direction.down:
+                    dist[1] = abs(self.elevators[1].currentPos - floor)
+        else:
+            if self.elevators[0].currentDirection == direction:
+                dist[0] = abs(self.elevators[0].currentPos - floor)
+            if self.elevators[1].currentDirection == direction:
+                dist[1] = abs(self.elevators[1].currentPos - floor)
+        if(dist[0] == 99 and dist[1] == 99):
+            return -1   
+        min_index = dist.index(min(dist))
+        return min_index
+    def getElevatorIdleAtSameFloor(self,floor):
+        # find the nearest elevator accrording to the floor that is requesting
+        # return index of the elevator; return -1 if no elevator is available
+        dist = [99,99]
+        min_index = -1
+        if(self.elevators[0].currentState != State.up and self.elevators[0].currentState != State.down and len(self.elevators[0].targetFloor)==0 and self.elevators[0].getCurrentFloor() == floor):
+            return 0
+        elif(self.elevators[1].currentState != State.up and self.elevators[1].currentState != State.down and len(self.elevators[1].targetFloor)==0 and self.elevators[1].getCurrentFloor() == floor):
+            return 1
+        else:
+            return -1
+    def tryAssignElevatorId(self,floor,direction:Direction):
+        id = -1
+        id = self.getElevatorIdleAtSameFloor(floor)
+        if self.assignTarget(id,floor):
+            return id
+        
+        id = -1
+        id = self.getNearestElevatorWithDirect(floor,direction)
+        if self.assignTarget(id,floor):
+            return id
+        
+        id = -1
+        id = self.getNearestStopElevator(floor)
+        if self.assignTarget(id,floor):
+            return id    
+    def assignTarget(self,eid:int,floor:int)->bool:
+        if eid != -1:
+            if self.elevators[eid].addTargetFloor(floor) == "OK":
+                return True
+            else:
+                return False
+        else:
+            return False
+    
     def update(self,msg:str) -> None:
         self.updateLCD()
         self.updateButtonText()
@@ -112,6 +171,7 @@ class ElevatorController():
             elevator_id = info["elevatorId"]
             floor = info["floor"]
             direction = info["direction"]
+            freeRideDirection = info["freeRideDirection"]
             count = info["count"]
             # Release control of the elevator if the elevator has left the floor
             if elevator_id != -1 and state == "not pressed":
@@ -128,10 +188,9 @@ class ElevatorController():
                     button.setStyleSheet("background-color: none;")
                 else:
                     # Get an available elevator
-                    eid = self.getNearestStopElevator(floor)
+                    eid = self.tryAssignElevatorId(floor,freeRideDirection)
                     if eid != -1:
-                        # Assign the task
-                        self.elevators[eid].addTargetFloor(floor)
+                        # Change Button State
                         self.button_dict[button_name]["state"] = "waiting"
                         self.button_dict[button_name]["elevatorId"] = eid
                 pass
@@ -208,6 +267,7 @@ class ElevatorController():
                 "elevatorId": -1,
                 "floor": 1,
                 "direction": "up",
+                "freeRideDirection":Direction.down,
                 "count": 0
             },
             "2_up": {
@@ -216,6 +276,7 @@ class ElevatorController():
                 "elevatorId": -1,
                 "floor": 2,
                 "direction": "up",
+                "freeRideDirection":Direction.up,
                 "count": 0
             },
             "2_down": {
@@ -224,6 +285,7 @@ class ElevatorController():
                 "elevatorId": -1,
                 "floor": 2,
                 "direction": "down",
+                "freeRideDirection":Direction.down,
                 "count": 0
             },
             "3_down": {
@@ -232,6 +294,7 @@ class ElevatorController():
                 "elevatorId": -1,
                 "floor": 3,
                 "direction": "down",
+                "freeRideDirection":Direction.up,
                 "count": 0
             }
         }
