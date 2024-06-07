@@ -108,6 +108,7 @@ class Elevator(QWidget):
     def waitForClosingDoor(self) -> None:
         # Open Flag is on, keep opened
         if self.doorOpenFlag:
+            self.doorInterval = 0.0
             self.doorOpenFlag = False
         # Close? transfer state to closing door
         if self.doorCloseFlag:
