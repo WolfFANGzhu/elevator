@@ -12,8 +12,7 @@ from PyQt5.QtWidgets import QApplication
 ##Example Code For Elevator Project
 #Feel free to rewrite this file!
 
-
-############ Elevator state ############
+SIMULATION_SPEED = 100 #ms
 #Feel free to design the states of your elevator system.
 class ElevatorState(IntEnum):
     up = 0
@@ -84,7 +83,7 @@ if __name__=='__main__':
         controller.update(status["temp_msg"])
     timer = QTimer()
     timer.timeout.connect(lambda: update(status))
-    timer.start(300) # 0.1 second
+    timer.start(SIMULATION_SPEED)
     sys.exit(app.exec_())
 
             
