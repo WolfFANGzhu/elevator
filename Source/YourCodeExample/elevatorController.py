@@ -193,6 +193,10 @@ class ElevatorController():
                         # Change Button State
                         self.button_dict[button_name]["state"] = "waiting"
                         self.button_dict[button_name]["elevatorId"] = eid
+                        # Also remove ensure only this button has control of elevator with this eid
+                        for b_name,info_item in self.button_dict.items():
+                            if self.button_dict[b_name]["elevatorId"] == eid and b_name != button_name:
+                                self.button_dict[b_name]["elevatorId"] = -1
                 pass
             elif state == "waiting":
                 # Check is the elevator that the button is waiting has arrived.
