@@ -16,7 +16,8 @@ class ZmqServerThread(threading.Thread):
         self.bindedClient = None
         self._receivedMessage:str = None
         self._messageTimeStamp:int = None # UNIX Time Stamp, should be int
-
+        self.e1_buffer = []
+        self.e2_buffer = []
         if(server_port is not None):
             self.port  = server_port
 
@@ -55,6 +56,7 @@ class ZmqServerThread(threading.Thread):
     @receivedMessage.setter
     def receivedMessage(self,value:str):
         self._receivedMessage = value
+        self.parse_message(value)
 
     #start listening
     def hosting(self, server_port:int = None)-> None:
@@ -85,4 +87,52 @@ class ZmqServerThread(threading.Thread):
     def run(self):
         self.hosting()
 
-
+    # Parse received message
+    def parse_message(self, msg:str):
+        # parse the msg 
+        # if the msg ends with #1, then append it to e1 buffer
+        if msg.endswith('#1'):
+            self.e1_buffer.append(msg)
+        elif msg.endswith('#2'):
+            self.e2_buffer.append(msg)
+    # Not used yet...
+    def consumeMsg(self,elevator:int,msg:str)->bool:
+        if elevator == 1:
+            if msg in self.e1_buffer:
+                self.e1_buffer.remove(msg)
+                return True
+            else:
+                return False
+        elif elevator == 2:
+            if msg in self.e2_buffer:
+                self.e2_buffer.remove(msg)
+                return True
+            else:
+                return False
+    def consumeFloorArrivedMessage(self,elevator:int,floor:int)->bool:
+        if elevator == 1:
+            for msg in self.e1_buffer:
+                if msg.endswith(f"floor_arrived@{floor}#1"):
+                    self.e1_buffer.remove(msg)
+                    return True
+            return False
+        elif elevator == 2:
+            for msg in self.e2_buffer:
+                if msg.endswith(f"floor_arrived@{floor}#2"):
+                    self.e2_buffer.remove(msg)
+                    return True
+            return False
+    
+    def consumeFloorArrivedWithDirectionMessage(self,elevator:int,floor:int,direction:str)->bool:
+        if elevator == 1:
+            for msg in self.e1_buffer:
+                if msg.endswith(f"#{direction}_floor_arrived@{floor}#1"):
+                    self.e1_buffer.remove(msg)
+                    return True
+            return False
+        elif elevator == 2:
+            for msg in self.e2_buffer:
+                if msg.endswith(f"floor_arrived@{floor}#{direction}#2"):
+                    self.e2_buffer.remove(msg)
+                    return True
+            return False

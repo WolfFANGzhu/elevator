@@ -63,8 +63,14 @@ def testing(server:Server.ZmqServerThread):
     time.sleep(1)
 
 
-    for passenger in passengers:
-        server.send_string(server.bindedClient,"call_up@1")
+
+
+    # for passenger in passengers:
+    server.send_string(server.bindedClient,"call_up@1")
+
+    server.send_string(server.bindedClient,"call_down@2")
+        # server.messageTimeStamp = server.messageTimeStamp + 1
+        # print("MessageTimeStamp"+str(server.messageTimeStamp))
 
     
     ############ Passenger timed automata ############
@@ -152,7 +158,17 @@ def testing(server:Server.ZmqServerThread):
 
         time.sleep(0.01)
 
-
+msgs = ["call_up@1",
+        "select_floor@3#1",
+        "call_up@2"
+        ]
+# msgs is a list of command messages: eg: ["call_up@1","call_down@2"]
+# interval is the time interval between each command message, in seconds
+def testing_serial(server:Server.ZmqServerThread, msgs:list[str], interval:int):
+    for msg in msgs:
+        server.send_string(server.bindedClient,msg)
+        time.sleep(interval)
+    
 
 
 if __name__ == "__main__":
@@ -168,6 +184,6 @@ if __name__ == "__main__":
             msg = input(f"Initiate evaluation for {addr}?: (y/n)\n")
             if msg == 'y':
                 my_server.bindedClient = addr
-                testing(my_server)
+                testing_serial(my_server,msgs,1)
             else:
                 continue
