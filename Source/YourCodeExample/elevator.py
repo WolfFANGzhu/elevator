@@ -110,6 +110,8 @@ class Elevator(QWidget):
         if self.doorOpenFlag:
             self.doorInterval = 0.0
             self.doorOpenFlag = False
+            self.doorCloseFlag = False
+            return
         # Close? transfer state to closing door
         if self.doorCloseFlag:
             self.doorInterval = 0.0
