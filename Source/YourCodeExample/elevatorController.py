@@ -88,66 +88,51 @@ class ElevatorController():
             self.button_dict[button_name]["state"] = "not pressed"
             self.button_dict[button_name]["elevatorId"] = -1
             self.button_dict[button_name]["count"] = 0
-    def getNearestStopElevator(self, floor: int) -> int:
+    def getNearestStopElevator(self, floor: int, dist) :
         # find the nearest elevator accrording to the floor that is requesting
         # return index of the elevator; return -1 if no elevator is available
-        dist = [99,99]
-        min_index = -1
+
         if(self.elevators[0].currentState == State.stopped_door_closed and len(self.elevators[0].targetFloor)==0):
             dist[0] = abs(self.elevators[0].getCurrentFloor() - floor)
         if(self.elevators[1].currentState == State.stopped_door_closed and len(self.elevators[1].targetFloor)==0):
             dist[1] = abs(self.elevators[1].getCurrentFloor() - floor)
-        if(dist[0] == 99 and dist[1] == 99):
-            return -1
-        min_index = dist.index(min(dist))
-        return min_index
-    def getNearestElevatorWithDirect(self,floor,direction:Direction):
-        dist = [99,99]
-        min_index = -1
+
+    def getNearestElevatorWithDirect(self,floor,direction:Direction,dist):
+
         if floor == 2:
             if direction == Direction.up:
-                if self.elevators[0].currentPos < 2 and self.elevators[0].currentDirection == Direction.up:
+                if self.elevators[0].currentPos < 1.5 and self.elevators[0].currentDirection == Direction.up:
                     dist[0] = abs(self.elevators[0].currentPos - floor)
-                if self.elevators[1].currentPos < 2 and self.elevators[1].currentDirection == Direction.up:
+                if self.elevators[1].currentPos < 1.5 and self.elevators[1].currentDirection == Direction.up:
                     dist[1] = abs(self.elevators[1].currentPos - floor)
             elif direction == Direction.down:
-                if self.elevators[0].currentPos > 2 and self.elevators[0].currentDirection == Direction.down:
+                if self.elevators[0].currentPos >= 2.5 and self.elevators[0].currentDirection == Direction.down:
                     dist[0] = abs(self.elevators[0].currentPos - floor)
-                if self.elevators[1].currentPos > 2 and self.elevators[1].currentDirection == Direction.down:
+                if self.elevators[1].currentPos >= 2.5 and self.elevators[1].currentDirection == Direction.down:
                     dist[1] = abs(self.elevators[1].currentPos - floor)
         else:
             if self.elevators[0].currentDirection == direction:
                 dist[0] = abs(self.elevators[0].currentPos - floor)
             if self.elevators[1].currentDirection == direction:
                 dist[1] = abs(self.elevators[1].currentPos - floor)
-        if(dist[0] == 99 and dist[1] == 99):
-            return -1   
-        min_index = dist.index(min(dist))
-        return min_index
-    def getElevatorIdleAtSameFloor(self,floor):
+
+    def getElevatorIdleAtSameFloor(self,floor,dist):
         # find the nearest elevator accrording to the floor that is requesting
         # return index of the elevator; return -1 if no elevator is available
-        dist = [99,99]
-        min_index = -1
         if(self.elevators[0].currentState != State.up and self.elevators[0].currentState != State.down and len(self.elevators[0].targetFloor)==0 and self.elevators[0].getCurrentFloor() == floor):
-            return 0
+            dist[0] = 0
         elif(self.elevators[1].currentState != State.up and self.elevators[1].currentState != State.down and len(self.elevators[1].targetFloor)==0 and self.elevators[1].getCurrentFloor() == floor):
-            return 1
-        else:
-            return -1
+            dist[1] = 0
+
     def tryAssignElevatorId(self,floor,direction:Direction):
+        dist = [99,99]
         id = -1
-        id = self.getElevatorIdleAtSameFloor(floor)
-        if self.assignTarget(id,floor):
-            return id
-        
-        id = -1
-        id = self.getNearestElevatorWithDirect(floor,direction)
-        if self.assignTarget(id,floor):
-            return id
-        
-        id = -1
-        id = self.getNearestStopElevator(floor)
+        self.getElevatorIdleAtSameFloor(floor,dist)        
+        self.getNearestElevatorWithDirect(floor,direction,dist)
+        self.getNearestStopElevator(floor,dist)
+        id = dist.index(min(dist))
+        if min(dist) == 99:
+            return -1
         if self.assignTarget(id,floor):
             return id  
         return -1  
@@ -207,10 +192,9 @@ class ElevatorController():
                     self.button_dict[button_name]["count"] = 0
                     # do not release the control of that elevator until that elevator actually leaves that floor
                     # self.button_dict[button_name]["elevatorId"] = -1
-                    button.setStyleSheet("background-color: none;")
-                
-            
+                    button.setStyleSheet("background-color: none;")        
         return
+    
     def floorArrivedMessage(self, direction:str,floor: int, eid: int,count:int) -> None:
         floors = ["-1", "1", "2", "3"]
         elevators = ["#1", "#2"]

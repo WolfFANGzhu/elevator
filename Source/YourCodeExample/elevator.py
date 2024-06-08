@@ -141,11 +141,13 @@ class Elevator(QWidget):
         message = f"floor_arrived@{floor_str}{elevator_str}"
         #print(message)
         self.zmqThread.sendMsg(message)
+
     def doorOpenedMessage(self,eid: int) -> None:
         elevators = ["#1", "#2"]
         elevator_str = elevators[eid - 1]
         message = f"door_opened{elevator_str}"
         self.zmqThread.sendMsg(message)
+        
     def doorClosedMessage(self,eid: int) -> None:
         elevators = ["#1", "#2"]
         elevator_str = elevators[eid - 1]
