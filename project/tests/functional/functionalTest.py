@@ -40,13 +40,16 @@ class FunctionalTest(unittest.TestCase):
         """Cleanup after each test case"""
         FunctionalTest.my_server.send_string(FunctionalTest.my_server.bindedClient, "reset")  # Reset the client
         time.sleep(1)
+        
+
 
     @classmethod
     def tearDownClass(cls):
         """Cleanup work after all test cases are executed"""
-        cls.my_server.send_string(cls.my_server.bindedClient, "reset")
+        FunctionalTest.my_server.send_string(FunctionalTest.my_server.bindedClient, "reset")
         time.sleep(1)
         print("[Test] Test Environment Cleaned")
+        
 
     def test_freeride(self):
         # Passenger A calls the elevator at 1st floor, select 3rd floor
@@ -85,4 +88,3 @@ class FunctionalTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    sys.exit()
