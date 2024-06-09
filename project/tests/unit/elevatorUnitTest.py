@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from unittest.mock import MagicMock, patch
-from elevator import Elevator
-from elevatorState import State
-from direction import Direction
-import NetClient
+from project.src.elevator import Elevator
+from project.src.elevatorState import State
+from project.src.direction import Direction 
+from project.src import NetClient
 
 class TestElevator(unittest.TestCase):
     @classmethod

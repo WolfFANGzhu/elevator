@@ -1,19 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
 broadcast chan requestUp, requestDown;
 broadcast chan arrive;
 broadcast chan openDoor, closeDoor;
-
-
-clock gclk;</declaration>
+int currentFloor;
+int targetFloor;
+ 
+clock gclk;
+</declaration>
 	<template>
 		<name x="5" y="5">Template</name>
 		<declaration>// Place local declarations here.</declaration>
-		<location id="id0" x="620" y="195">
+		<location id="id0" x="238" y="102">
+		</location>
+		<location id="id1" x="391" y="8">
+		</location>
+		<location id="id2" x="578" y="0">
+		</location>
+		<location id="id3" x="714" y="59">
+		</location>
+		<location id="id4" x="722" y="144">
+		</location>
+		<location id="id5" x="442" y="76">
+		</location>
+		<location id="id6" x="484" y="187">
 		</location>
 		<init ref="id0"/>
+		<transition id="id7">
+			<source ref="id0"/>
+			<target ref="id1"/>
+		</transition>
 	</template>
 	<system>// Process
 Elevator1 = Elevator();
@@ -27,8 +45,8 @@ system Elevator1, Elevator2, Passenger1, Passenger2;
 </system>
 	<queries>
 		<query>
-			<formula></formula>
-			<comment></comment>
+			<formula/>
+			<comment/>
 		</query>
 	</queries>
 </nta>

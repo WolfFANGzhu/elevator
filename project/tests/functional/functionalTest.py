@@ -3,7 +3,7 @@ import unittest
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-import Server
+from project.src import Server
 import os
 import time
 import random
@@ -85,3 +85,4 @@ class FunctionalTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    sys.exit()

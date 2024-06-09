@@ -1,9 +1,10 @@
-from elevatorState import State
-from direction import Direction
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox,QWidget
 from PyQt5.QtCore import QTimer, Qt
-import NetClient
+
+from .elevatorState import State
+from .direction import Direction
+from . import NetClient
 # Elevator
 class Elevator(QWidget):
     elevatorWaitTime: float = 3.0
