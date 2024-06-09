@@ -2,6 +2,7 @@ import zmq
 import os
 import threading
 import time
+import queue
 
 
 class ZmqClientThread(threading.Thread):
@@ -16,10 +17,15 @@ class ZmqClientThread(threading.Thread):
         self._socket.setsockopt_string(zmq.IDENTITY, identity) #default encoding is UTF-8 #Set your IDENTITY before connection.
         self._receivedMessage:str = None
         self._messageTimeStamp:int = None # UNIX Time Stamp, should be int
-        self.buffer = []
+        self._sentTimeStamp:int = None
+        self._msgSentQueue:queue.Queue = queue.Queue()
+        
         self._socket.connect( "tcp://{0}:{1}".format(serverIp, port) ) #Both ("tcp://localhost:27132") and ("tcp://127.0.0.1:27132") are OK
 
         self.sendMsg("Client[{0}] is online".format(self._identity))##Telling server I'm online
+        self.t = threading.Thread(target=self.__listenQueue)
+        self.t.start()
+
         self.start() #start the client thread
 
     @property
@@ -32,6 +38,17 @@ class ZmqClientThread(threading.Thread):
     @messageTimeStamp.setter
     def messageTimeStamp(self,value:int):
         self._messageTimeStamp = value
+
+    @property
+    def sentTimeStamp(self)->int:
+        if(self._sentTimeStamp == None):
+            return -1
+        else:
+            return self._sentTimeStamp
+        
+    @sentTimeStamp.setter
+    def sentTimeStamp(self,value:int):
+        self._sentTimeStamp = value
 
     @property
     def receivedMessage(self)->str:
@@ -53,7 +70,6 @@ class ZmqClientThread(threading.Thread):
                 message_str = message.decode()
                 print("Message from server: "+message_str) #Helpful for debugging. You can comment out this statement.
                 self.receivedMessage = message_str
-                self.buffer.append(self.receivedMessage)
                 self.messageTimeStamp = int(round(time.time() * 1000)) #UNIX Time Stamp
             else:
                 print("socket is closed,can't receive any message...")
@@ -66,7 +82,16 @@ class ZmqClientThread(threading.Thread):
     #Send messages to the server
     #You can rewrite this part as long as you can send messages to server.
     def sendMsg(self, data:str):
+        self._msgSentQueue.put(data)
+
+    def __sendMsg(self,data:str):
         if not self._socket.closed:
             self._socket.send_string(data)
         else:
             print("socket is closed,can't send message...")
+
+    def __listenQueue(self):
+        while True:
+            if((not self._msgSentQueue.empty()) and ((int(round(time.time() * 1000)) - self.sentTimeStamp) > 800)):
+                self.sentTimeStamp = int(round(time.time() * 1000))
+                self.__sendMsg(self._msgSentQueue.get())

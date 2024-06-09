@@ -3,6 +3,7 @@ import zmq
 import threading
 import sys
 import os
+import queue
 
 
 class ZmqServerThread(threading.Thread):
@@ -16,12 +17,17 @@ class ZmqServerThread(threading.Thread):
         self.bindedClient = None
         self._receivedMessage:str = None
         self._messageTimeStamp:int = None # UNIX Time Stamp, should be int
-        self.e1_buffer = []
-        self.e2_buffer = []
+        self._sentTimeStamp:int = None
+        self.msgQueue:queue.Queue = queue.Queue()
+
+
         if(server_port is not None):
             self.port  = server_port
 
         print("Start hosting at port:{port}".format(port = self._port))
+        self.t = threading.Thread(target=self.listen_queue)
+        self.t.start()
+        print("Start listening queue")
         self.start()
 
 
@@ -56,7 +62,17 @@ class ZmqServerThread(threading.Thread):
     @receivedMessage.setter
     def receivedMessage(self,value:str):
         self._receivedMessage = value
-        self.parse_message(value)
+
+    @property
+    def sentTimeStamp(self)->int:
+        if(self._sentTimeStamp == None):
+            return -1
+        else:
+            return self._sentTimeStamp
+        
+    @sentTimeStamp.setter
+    def sentTimeStamp(self,value:int):
+        self._sentTimeStamp = value
 
     #start listening
     def hosting(self, server_port:int = None)-> None:
@@ -72,11 +88,19 @@ class ZmqServerThread(threading.Thread):
             self.clients_addr.add(address_str)
             self.messageTimeStamp = int(round(time.time() * 1000)) #UNIX Time Stamp
             self.receivedMessage = contents_str
-            print("client:[%s] message:%s\n"%(address_str,contents_str))
+            print("client:[%s] message:%s Timestamp:%s\n"%(address_str,contents_str,str(self.messageTimeStamp)))
 
-
+    def listen_queue(self):
+        while True:
+            if((not self.msgQueue.empty()) and ((int(round(time.time() * 1000)) - self.sentTimeStamp) > 800)):
+                self.sentTimeStamp = int(round(time.time() * 1000))
+                self.__send_string(self.bindedClient,self.msgQueue.get())
 
     def send_string(self,address:str,msg:str =""):
+        self.msgQueue.put(msg)
+
+
+    def __send_string(self,address:str,msg:str =""):
         if not self.socket.closed:
             print("Server:[%s] message:%s\n"%(str(address),str(msg)))
             self.socket.send_multipart([address.encode(), msg.encode()]) #send msg to address
@@ -87,52 +111,4 @@ class ZmqServerThread(threading.Thread):
     def run(self):
         self.hosting()
 
-    # Parse received message
-    def parse_message(self, msg:str):
-        # parse the msg 
-        # if the msg ends with #1, then append it to e1 buffer
-        if msg.endswith('#1'):
-            self.e1_buffer.append(msg)
-        elif msg.endswith('#2'):
-            self.e2_buffer.append(msg)
-    # Not used yet...
-    def consumeMsg(self,elevator:int,msg:str)->bool:
-        if elevator == 1:
-            if msg in self.e1_buffer:
-                self.e1_buffer.remove(msg)
-                return True
-            else:
-                return False
-        elif elevator == 2:
-            if msg in self.e2_buffer:
-                self.e2_buffer.remove(msg)
-                return True
-            else:
-                return False
-    def consumeFloorArrivedMessage(self,elevator:int,floor:int)->bool:
-        if elevator == 1:
-            for msg in self.e1_buffer:
-                if msg.endswith(f"floor_arrived@{floor}#1"):
-                    self.e1_buffer.remove(msg)
-                    return True
-            return False
-        elif elevator == 2:
-            for msg in self.e2_buffer:
-                if msg.endswith(f"floor_arrived@{floor}#2"):
-                    self.e2_buffer.remove(msg)
-                    return True
-            return False
-    
-    def consumeFloorArrivedWithDirectionMessage(self,elevator:int,floor:int,direction:str)->bool:
-        if elevator == 1:
-            for msg in self.e1_buffer:
-                if msg.endswith(f"#{direction}_floor_arrived@{floor}#1"):
-                    self.e1_buffer.remove(msg)
-                    return True
-            return False
-        elif elevator == 2:
-            for msg in self.e2_buffer:
-                if msg.endswith(f"floor_arrived@{floor}#{direction}#2"):
-                    self.e2_buffer.remove(msg)
-                    return True
-            return False
+
