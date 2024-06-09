@@ -1,2 +1,2 @@
-Source/Testcase/__pycache__/*
-Source/YourCodeExample/__pycache__/*
+project/src/__pycache__/*
+project/tests/__pycache__/*
