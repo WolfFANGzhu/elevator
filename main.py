@@ -1,11 +1,11 @@
 import os
 import sys
-import NetClient
 import time
 from enum import IntEnum
-from elevator import Elevator
-from elevatorState import State
-from elevatorController import ElevatorController
+from project.src import NetClient
+from project.src.elevator import Elevator
+from project.src.elevatorState import State
+from project.src.elevatorController import ElevatorController
 from PyQt5.QtCore import QTimer
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication

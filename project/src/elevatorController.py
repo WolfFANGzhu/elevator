@@ -1,7 +1,3 @@
-from elevator import Elevator
-from elevatorState import State
-from direction import Direction
-import NetClient
 from PyQt5 import  QtWidgets
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtTest import QTest
@@ -9,6 +5,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsRectItem
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtGui import QBrush,QColor
+
+from .elevator import Elevator
+from .elevatorState import State
+from .direction import Direction
+from . import NetClient
+
 # Elevator Controller
 # This class is responsible for 
 # 1. Parsing the command from the server
