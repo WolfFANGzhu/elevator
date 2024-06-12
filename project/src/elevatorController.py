@@ -118,12 +118,17 @@ class ElevatorController():
             if self.elevators[1].currentDirection == direction:
                 dist[1] = abs(self.elevators[1].currentPos - floor)
 
+    def is_elevator_idle_at_floor(self,idex, floor):
+        """Check if an elevator is idle at a specific floor"""
+        return (self.elevators[idex].currentState != State.up and self.elevators[idex].currentState != State.down 
+                and len(self.elevators[idex].targetFloor) == 0 and self.elevators[idex].getCurrentFloor() == floor)
+    
     def getElevatorIdleAtSameFloor(self,floor,dist):
         # find the nearest elevator accrording to the floor that is requesting
         # return index of the elevator; return -1 if no elevator is available
-        if(self.elevators[0].currentState != State.up and self.elevators[0].currentState != State.down and len(self.elevators[0].targetFloor)==0 and self.elevators[0].getCurrentFloor() == floor):
+        if self.is_elevator_idle_at_floor(0, floor):
             dist[0] = 0
-        elif(self.elevators[1].currentState != State.up and self.elevators[1].currentState != State.down and len(self.elevators[1].targetFloor)==0 and self.elevators[1].getCurrentFloor() == floor):
+        if self.is_elevator_idle_at_floor(1, floor):
             dist[1] = 0
 
     def tryAssignElevatorId(self,floor,direction:Direction):
@@ -154,9 +159,12 @@ class ElevatorController():
                         return -1
                     else:
                         pass
-            elif direction == Direction.down:
-                if self.elevators[id].currentPos >= 2.5 and self.elevators[id].currentDirection == Direction.down:
-                    return id
+            if (self.is_elevator_idle_at_floor(0, floor)) and (self.is_elevator_idle_at_floor(1, floor)):
+                if self.button_dict["2_up"]["elevatorId"] == self.button_dict["2_down"]["elevatorId"]:
+                    self.button_dict["2_up"]["elevatorId"] = 0
+                    self.button_dict["2_down"]["elevatorId"] = 1
+                else:
+                    pass
         if self.assignTarget(id,floor):
             return id  
         return -1  
