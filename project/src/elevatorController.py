@@ -135,6 +135,28 @@ class ElevatorController():
         id = dist.index(min(dist))
         if min(dist) == 99:
             return -1
+        if floor == 2:
+            if direction == Direction.up:
+                # 2_up
+                if self.button_dict["2_down"]["elevatorId"] != id:
+                    pass
+                else:
+                    if(self.button_dict["2_down"]["state"] == "waiting"):
+                        return -1
+                    else:
+                        pass
+            elif direction == Direction.down:
+                # 2_down
+                if self.button_dict["2_up"]["elevatorId"] != id:
+                    pass
+                else:
+                    if(self.button_dict["2_up"]["state"] == "waiting"):
+                        return -1
+                    else:
+                        pass
+            elif direction == Direction.down:
+                if self.elevators[id].currentPos >= 2.5 and self.elevators[id].currentDirection == Direction.down:
+                    return id
         if self.assignTarget(id,floor):
             return id  
         return -1  
