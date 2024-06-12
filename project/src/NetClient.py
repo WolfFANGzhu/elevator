@@ -19,7 +19,7 @@ class ZmqClientThread(threading.Thread):
         self._messageTimeStamp:int = None # UNIX Time Stamp, should be int
         self._sentTimeStamp:int = None
         self._msgSentQueue:queue.Queue = queue.Queue()
-        
+        self.buffer = []
         self._socket.connect( "tcp://{0}:{1}".format(serverIp, port) ) #Both ("tcp://localhost:27132") and ("tcp://127.0.0.1:27132") are OK
 
         self.sendMsg("Client[{0}] is online".format(self._identity))##Telling server I'm online
@@ -70,6 +70,7 @@ class ZmqClientThread(threading.Thread):
                 message_str = message.decode()
                 print("Message from server: "+message_str) #Helpful for debugging. You can comment out this statement.
                 self.receivedMessage = message_str
+                self.buffer.append(message_str)
                 self.messageTimeStamp = int(round(time.time() * 1000)) #UNIX Time Stamp
             else:
                 print("socket is closed,can't receive any message...")

@@ -19,6 +19,8 @@ class ZmqServerThread(threading.Thread):
         self._messageTimeStamp:int = None # UNIX Time Stamp, should be int
         self._sentTimeStamp:int = None
         self.msgQueue:queue.Queue = queue.Queue()
+        self.e1_buffer = []
+        self.e2_buffer = []
 
 
         if(server_port is not None):
@@ -88,6 +90,10 @@ class ZmqServerThread(threading.Thread):
             self.clients_addr.add(address_str)
             self.messageTimeStamp = int(round(time.time() * 1000)) #UNIX Time Stamp
             self.receivedMessage = contents_str
+            if contents_str.endswith("#1"):
+                self.e1_buffer.append(contents_str)
+            elif contents_str.endswith("#2"):
+                self.e2_buffer.append(contents_str)
             print("client:[%s] message:%s Timestamp:%s\n"%(address_str,contents_str,str(self.messageTimeStamp)))
 
     def listen_queue(self):
