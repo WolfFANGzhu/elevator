@@ -97,6 +97,7 @@ class Elevator(QWidget):
             self.doorOpenFlag = False
             #print("door opening #"+str(self.elevatorId))
             self.currentState = State.stopped_opening_door
+            return
         # Keep Closing the door
         self.doorInterval += self.doorSpeed
         if self.doorInterval >= Elevator.doorCloseTime:
@@ -119,8 +120,8 @@ class Elevator(QWidget):
             self.currentState = State.stopped_closing_door
             self.doorCloseFlag = False
             return
-
-
+        
+        # Keep waiting
         self.doorInterval += self.doorSpeed
         if self.doorInterval >= Elevator.elevatorWaitTime:
             self.doorInterval = 0.0
@@ -160,11 +161,15 @@ class Elevator(QWidget):
             return False
         # If there is a target floor, begin to move
         if self.targetFloor[0] > self.currentPos:
+            #[3,2]
             self.currentState = State.up
             self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
+            #[2,3]
         elif self.targetFloor[0] < self.currentPos:
+            #[2,1]
             self.currentState = State.down
             self.targetFloor.sort(reverse=(self.currentDirection == Direction.down))
+            #[1,2]
         elif self.targetFloor[0] == self.currentPos:
             self.targetFloor.remove(int(self.currentPos))
             self.clear_floor_ui(floor=int(self.currentPos))

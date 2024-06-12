@@ -9,10 +9,11 @@ if __name__ == "__main__":
     run_command("python -m main")
 
     # Give the main application some time to start up
-    time.sleep(5)
+    time.sleep(2)
 
     # Run the elevator unit tests
     run_command("python -m project.tests.functional.functionalTest")
 
     # Optionally, run the functional tests
-    # run_command("python -m functionalTest")
+    # run_command("python -m unittest project.tests.unit.elevatorUnitTest")
+    # run_command("python -m project.tests.functional.functionalTest")
