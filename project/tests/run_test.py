@@ -12,8 +12,8 @@ if __name__ == "__main__":
     time.sleep(2)
 
     # Run the elevator unit tests
-    #run_command("python -m project.tests.functional.functionalTest")
-    run_command("python -m project.src.main")
+    run_command("python -m project.tests.functional.functionalTest")
+    #run_command("python -m project.src.main")
     # Optionally, run the functional tests
     # run_command("python -m unittest project.tests.unit.elevatorUnitTest")
     # run_command("python -m project.tests.functional.functionalTest")

@@ -108,7 +108,7 @@ class ZmqServerThread(threading.Thread):
 
     def __send_string(self,address:str,msg:str =""):
         if not self.socket.closed:
-            print("Server:[%s] message:%s\n"%(str(address),str(msg)))
+            print("Server:[%s] message:%s Timestamp:%s\n"%(str(address),str(msg),str(self.sentTimeStamp)))
             self.socket.send_multipart([address.encode(), msg.encode()]) #send msg to address
         else:
             print("socket is closed,can't send message...")

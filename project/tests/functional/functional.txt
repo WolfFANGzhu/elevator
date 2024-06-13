@@ -1,0 +1,40 @@
+预计时间：开关门各1s,电梯运行2s/楼，开门后等待时间3s
+调度算法：
+TestCase1:
+1. 初始时，两台电梯都在一层，位于2层的乘客A和B同时（间隔小于0.5s）按下位于二楼的外部按钮up 和 down
+    理论输出：2_up clicked，2_down clicked，floor_arrived@2#2 ， down_floor_arrived@2#2 ，floor_arrived@2#1 ， up_floor_arrived@2#1 
+2. 现状态为两电梯都在2楼，等待电梯门关闭后，位于2层的乘客A和B再次同时（间隔小于0.5s）按下位于二楼的外部按钮up 和 down
+    理论输出：2_up clicked，2_down clicked，floor_arrived@2#2 ， down_floor_arrived@2#2 ，floor_arrived@2#1 ， up_floor_arrived@2#1 
+3. 然后乘客A进入电梯1，按下电梯内部按钮3，乘客B进入电梯2，按下电梯内部按钮1
+    理论输出：select_floor@3#1 ， select_floor@1#2 
+4. 等待电梯运行至相应楼层
+    理论输出： floor_arrived@3#1 , floor_arrived@1#2
+上述过程中，乘客类自行加上对应如进入电梯，到达目标楼层等输出
+
+TestCase2:
+1. 初始时，两台电梯都在一层,乘客A按下一楼电梯外部按钮up, 进入电梯后按下内部按钮3，乘客C一同进入
+    理论输出：1_up clicked，up_floor_arrived@1#1 , select_floor@3#1
+2. 间隔6s后，位于1楼的乘客B按下一楼的外部按钮up, 进入电梯后按下内部按钮3，乘客D一同进入
+    理论输出：1_up clicked，up_floor_arrived@1#2, select_floor@3#2
+3. 在电梯1向上运行1.5s至2s之间(可以选择1.8s时)，位于电梯内部的乘客C按下了电梯内部按钮2
+    理论输出：（未定，待观察）
+4. 在电梯2向上运行1s时，位于电梯内部的乘客D按下了电梯内部按钮2
+    理论输出： select_floor@2#2
+5. 电梯1不停靠2楼，直接来到三楼，乘客A到达指定楼层, 乘客C未到达指定楼层
+    理论输出：floor_arrived@3#1
+6. 电梯2停靠2楼，进行一次开关门，乘客D到达指定楼层
+    理论输出：floor_arrived@2#2
+7. 电梯2继续上行，来到三楼，乘客B到达指定楼层
+    理论输出：floor_arrived@3#2
+
+TestCase3:
+
+3. 两台同时1往3， 先动的先接2楼
+4. 1往3，3往1，2楼向下，2楼向上： 同向接
+5. 外部2向上，3向下，分配给0号电梯
+
+
+7. 开关门：开门时关门，关门时开门，开门时一直按开门
+
+8. 电梯按与方向不同的内部按钮
+6. 内部按钮阈值和外部按钮阈值

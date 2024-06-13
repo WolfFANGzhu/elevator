@@ -1,6 +1,6 @@
 import sys
 import os
-import Server
+from . import Server
 import time
 import random
 from enum import IntEnum
