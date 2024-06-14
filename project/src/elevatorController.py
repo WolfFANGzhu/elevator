@@ -533,8 +533,8 @@ class ElevatorController():
                 self.outPanels[i]['e1'].setText(str(-1))
             else:
                 self.outPanels[i]['e1'].setText(str(self.elevators[0].getCurrentFloor()))
-            if self.elevators[1].getCurrentFloor()==0:
-                self.elevators[i]['e2'].setText(str(-1))
+            if self.elevators[1].getCurrentFloor() == 0:
+                self.outPanels[i]['e2'].setText(str(-1))
             else:
                 self.outPanels[i]['e2'].setText(str(self.elevators[1].getCurrentFloor()))
         return
