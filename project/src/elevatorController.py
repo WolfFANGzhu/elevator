@@ -442,6 +442,7 @@ class ElevatorController():
     # Debug Util Function
     def updateButtonText(self):
         for button_name, info in self.button_dict.items():
-            self.button_dict[button_name]["button"].setText(f"{info['state']} E{info['elevatorId']} Count:{info['count']}")
+            # self.button_dict[button_name]["button"].setText(f"{info['state']} E{info['elevatorId']} Count:{info['count']}")
+            pass
 # if __name__=='__main__':
 #     print(ElevatorController("","","").posToWin(3.0))

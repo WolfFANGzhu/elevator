@@ -256,7 +256,8 @@ class Elevator(QWidget):
         layout = QtWidgets.QVBoxLayout(self)
         self.label = QtWidgets.QLabel("E#" + str(self.elevatorId))
         layout.addWidget(self.label)
-        self.label2 = QtWidgets.QLabel("State#" + str(self.elevatorId))
+        # self.label2 = QtWidgets.QLabel("State#" + str(self.elevatorId))
+        self.label2 = QtWidgets.QLabel()
         layout.addWidget(self.label2)
 
         self.LCD = QtWidgets.QLCDNumber()
@@ -352,25 +353,25 @@ class Elevator(QWidget):
         self.set_lcd_value(1)
     def updateUi(self):
         self.set_lcd_value(self.getCurrentFloor())
-        if self.currentDirection == Direction.up:
-            self.label.setText("up " + str(self.targetFloor))
-        elif self.currentDirection == Direction.down:
-            self.label.setText("down" + str(self.targetFloor))
-        elif self.currentDirection == Direction.wait:
-            self.label.setText("wait" + str(self.targetFloor))
+        # if self.currentDirection == Direction.up:
+        #     self.label.setText("up " + str(self.targetFloor))
+        # elif self.currentDirection == Direction.down:
+        #     self.label.setText("down" + str(self.targetFloor))
+        # elif self.currentDirection == Direction.wait:
+        #     self.label.setText("wait" + str(self.targetFloor))
         
-        if self.currentState == State.stopped_door_closed:
-            self.label2.setText("stopped_door_closed")
-        elif self.currentState == State.stopped_door_opened:
-            self.label2.setText("stopped_door_opened")
-        elif self.currentState == State.stopped_opening_door:
-            self.label2.setText("stopped_opening_door")
-        elif self.currentState == State.stopped_closing_door:
-            self.label2.setText("stopped_closing_door")
-        elif self.currentState == State.up:
-            self.label2.setText("up")
-        elif self.currentState == State.down:
-            self.label2.setText("down")
+        # if self.currentState == State.stopped_door_closed:
+        #     self.label2.setText("stopped_door_closed")
+        # elif self.currentState == State.stopped_door_opened:
+        #     self.label2.setText("stopped_door_opened")
+        # elif self.currentState == State.stopped_opening_door:
+        #     self.label2.setText("stopped_opening_door")
+        # elif self.currentState == State.stopped_closing_door:
+        #     self.label2.setText("stopped_closing_door")
+        # elif self.currentState == State.up:
+        #     self.label2.setText("up")
+        # elif self.currentState == State.down:
+        #     self.label2.setText("down")
     # When a target floor arrives, clear the button
     def clear_floor_ui(self,floor:int):
         if floor == 1:
