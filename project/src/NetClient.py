@@ -93,6 +93,6 @@ class ZmqClientThread(threading.Thread):
 
     def __listenQueue(self):
         while True:
-            if((not self._msgSentQueue.empty()) and ((int(round(time.time() * 1000)) - self.sentTimeStamp) > 800)):
+            if((not self._msgSentQueue.empty()) and ((int(round(time.time() * 1000)) - self.sentTimeStamp) > 500)):
                 self.sentTimeStamp = int(round(time.time() * 1000))
                 self.__sendMsg(self._msgSentQueue.get())
