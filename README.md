@@ -12,26 +12,22 @@ python -m main
 
 To run the tests, follow the steps below:
 
-1. Open the file `project/tests/run_test.py` in your text editor.
+1. Open a terminal and navigate to the project's root directory.
 
-2. Paste the appropriate command for the test you want to run. For example:
-
-   For the `elevator` module's unit test:
+2. Use the following command to run the desired test. Replace `test_type` with one of the following options: `main`, `door`, `main_src`, `scheduling`, `control_unit`, `elevator_unit`.
 
    ```bash
-   python -m unittest project.tests.unit.elevatorUnitTest
+   python -m run_command --test test_type
    ```
 
-   For the system's functional test:
+   For example, to run the `elevator` module's unit test, use:
 
    ```bash
-   python -m project.tests.functional.functionalTest
+   python -m run_command --test elevator_unit
    ```
 
-3. Save and close `run_test.py`.
-
-4. Open a terminal, navigate to the project's root directory, and run the following command:
+   Or to run the system's door functional test, use:
 
    ```bash
-   python -m project.tests.run_test
+   python -m run_command --test door
    ```

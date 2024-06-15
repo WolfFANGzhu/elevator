@@ -3,7 +3,6 @@ import unittest
 from project.src import Server
 import time
 
-
 def testing_serial(server: Server.ZmqServerThread, msgs: list[str], intervals: list[int]):
     for msg, interval in zip(msgs, intervals):
         server.send_string(server.bindedClient, msg)
