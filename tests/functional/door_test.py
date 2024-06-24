@@ -1,6 +1,7 @@
 import unittest
 from src import Server
 import time
+import sys
 
 def testing_serial(server: Server.ZmqServerThread, msgs: list[str], intervals: list[int]):
     for msg, interval in zip(msgs, intervals):

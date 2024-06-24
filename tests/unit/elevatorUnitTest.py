@@ -30,7 +30,7 @@ class TestElevator(unittest.TestCase):
         cls.app.quit()
         pass
 
-    def test_reset(self):
+    def test1_reset(self):
         """Test the reset functionality"""
         # Set some initial state
         self.elevator.currentPos = 2.0
@@ -57,7 +57,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorCloseFlag, False)
         self.assertEqual(self.elevator.currentState, State.stopped_door_closed)
     
-    def test_move_up_not_arrive(self):
+    def test2_1_move_up_not_arrive(self):
         """Test the move functionality without changing status"""
         initialPos = 1.1
         # Initialize the elevator status
@@ -69,7 +69,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.targetFloor, [2])
         self.assertEqual(self.elevator.currentState, State.up)
 
-    def test_move_down_not_arrive(self):
+    def test2_2_move_down_not_arrive(self):
         """Test the move functionality when moving down"""
         initialPos = 2.4
         self.elevator.currentState = State.down
@@ -80,7 +80,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.targetFloor, [1])
         self.assertEqual(self.elevator.currentState, State.down)
 
-    def test_move_up_arrive_at_floor_without_multiple_target(self):
+    def test2_3_move_up_arrive_at_floor_without_multiple_target(self):
         self.elevator.currentState = State.up
         self.elevator.currentDirection = Direction.up
         self.elevator.currentPos = 3.0 - self.elevator.getCurrentSpeed()
@@ -91,7 +91,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.currentState, State.stopped_opening_door)
         self.assertEqual(self.elevator.currentDirection, Direction.wait)
     
-    def test_move_down_arrive_at_floor_with_multiple_target(self):
+    def test2_4_move_down_arrive_at_floor_with_multiple_target(self):
         self.elevator.currentState = State.down
         self.elevator.currentDirection = Direction.down
         self.elevator.currentPos = 2.0 + self.elevator.getCurrentSpeed()
@@ -102,7 +102,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.currentState, State.stopped_opening_door)
         self.assertEqual(self.elevator.currentDirection, Direction.down)
 
-    def test_openingDoor_openFlag_true_closeFlag_false(self):
+    def test3_1_openingDoor_openFlag_true_closeFlag_false(self):
         """Test opening door when openFlag is True, closeFlag is True, and not changing status"""
         self.elevator.doorOpenFlag = True
         self.elevator.doorCloseFlag = False
@@ -114,7 +114,7 @@ class TestElevator(unittest.TestCase):
         self.assertFalse(self.elevator.doorCloseFlag)
         self.assertEqual(self.elevator.doorInterval,interval+self.elevator.doorSpeed)
         self.assertEqual(self.elevator.currentState, State.stopped_opening_door)
-    def test_openingDoor_openFlag_false_closeFlag_true(self):
+    def test3_2_openingDoor_openFlag_false_closeFlag_true(self):
         """Test opening door when openFlag is False, closeFlag is False, and is changing status"""
         self.elevator.doorOpenFlag = False
         self.elevator.doorCloseFlag = True
@@ -127,7 +127,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorInterval,0.0)
         self.assertEqual(self.elevator.currentState, State.stopped_door_opened)
 
-    def test_closingDoor_openFlag_true_closeFlag_false(self):
+    def test4_1_closingDoor_openFlag_true_closeFlag_false(self):
         """Test closing door when openFlag is True, closeFlag is False, and changing status to opening door"""
         self.elevator.doorOpenFlag = True
         self.elevator.doorCloseFlag = False
@@ -140,7 +140,7 @@ class TestElevator(unittest.TestCase):
         self.assertAlmostEqual(self.elevator.doorInterval,0.3)
         self.assertEqual(self.elevator.currentState, State.stopped_opening_door)
 
-    def test_closingDoor_openFlag_false_closeFlag_false(self):
+    def test4_2_closingDoor_openFlag_false_closeFlag_false(self):
         self.elevator.doorOpenFlag = False
         self.elevator.doorCloseFlag = False
         self.elevator.currentState = State.stopped_closing_door
@@ -151,7 +151,7 @@ class TestElevator(unittest.TestCase):
         self.assertFalse(self.elevator.doorCloseFlag)
         self.assertAlmostEqual(self.elevator.doorInterval, 0.8)
         self.assertEqual(self.elevator.currentState, State.stopped_closing_door)
-    def test_closingDoor_openFlag_false_closeFlag_true(self):
+    def test4_3_closingDoor_openFlag_false_closeFlag_true(self):
         """Test closing door when openFlag is False, closeFlag is True, and changing status to door closed"""
         self.elevator.doorOpenFlag = False
         self.elevator.doorCloseFlag = True
@@ -164,7 +164,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorInterval,0.0)
         self.assertEqual(self.elevator.currentState, State.stopped_door_closed)
 
-    def test_waitForClosingDoor_openFlag_true_closeFlag_true(self):
+    def test5_1_waitForClosingDoor_openFlag_true_closeFlag_true(self):
         """Test door opened(waiting to close) when openFlag is True, closeFlag is True, and changing status to door closed"""
         self.elevator.doorOpenFlag = True
         self.elevator.doorCloseFlag = True
@@ -177,7 +177,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorInterval,0.0)
         self.assertEqual(self.elevator.currentState, State.stopped_door_opened)
 
-    def test_waitForClosingDoor_openFlag_false_closeFlag_false_larger_waiting(self):
+    def test5_2_waitForClosingDoor_openFlag_false_closeFlag_false_larger_waiting(self):
         """Test door opened(waiting to close) when openFlag is False, closeFlag is False, and changing status to door closed"""
         self.elevator.doorOpenFlag = False
         self.elevator.doorCloseFlag = False
@@ -190,7 +190,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorInterval,0.0)
         self.assertEqual(self.elevator.currentState, State.stopped_closing_door)
     
-    def test_waitForClosingDoor_openFlag_false_closeFlag_false_less_waiting(self):
+    def test5_3_waitForClosingDoor_openFlag_false_closeFlag_false_less_waiting(self):
         self.elevator.doorOpenFlag = False
         self.elevator.doorCloseFlag = False
         self.elevator.currentState = State.stopped_door_opened
@@ -202,7 +202,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorInterval,0.4)
         self.assertEqual(self.elevator.currentState, State.stopped_door_opened)
     
-    def test_waitForClosingDoor_openFlag_false_closeFlag_true(self):
+    def test5_4waitForClosingDoor_openFlag_false_closeFlag_true(self):
         self.elevator.doorOpenFlag = False
         self.elevator.doorCloseFlag = True
         self.elevator.currentState = State.stopped_door_opened
@@ -214,7 +214,7 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.doorInterval,0.0)
         self.assertEqual(self.elevator.currentState, State.stopped_closing_door)
     
-    def test_floor_arrived_message_up(self):
+    def test6_floor_arrived_message_up(self):
         """Test the floorArrivedMessage when direction is up"""
         self.elevator.currentDirection = Direction.up
         self.elevator.floorArrivedMessage(floor=2, eid=1)
@@ -222,25 +222,25 @@ class TestElevator(unittest.TestCase):
         expected_message = "floor_arrived@2#1"
         self.zmqThreadMock.sendMsg.assert_called_once_with(expected_message)
 
-    def test_door_opened_message(self):
+    def test7_door_opened_message(self):
         """Test the doorOpenedMessage functionality"""
         self.elevator.doorOpenedMessage(eid=1)
         expected_message = "door_opened#1"
         self.zmqThreadMock.sendMsg.assert_called_once_with(expected_message)
 
-    def test_door_closed_message(self):
+    def test8_door_closed_message(self):
         """Test the doorClosedMessage functionality"""
         self.elevator.doorClosedMessage(eid=1)
         expected_message = "door_closed#1"
         self.zmqThreadMock.sendMsg.assert_called_once_with(expected_message)
 
-    def test_checkTargetFloor_none(self):
+    def test9_1_checkTargetFloor_none(self):
         """Test the check target floor functionality: no target floor"""
         self.elevator.currentState = State.stopped_door_closed
         self.elevator.targetFloor = []
         res = self.elevator.checkTargetFloor()
         self.assertFalse(res)
-    def test_checkTargetFloor_changeToUp(self): 
+    def test9_2_checkTargetFloor_changeToUp(self): 
         """Test the check target floor functionality: target floor upwards""" 
         self.elevator.currentDirection = Direction.up
         self.elevator.currentState = State.stopped_door_closed
@@ -250,7 +250,7 @@ class TestElevator(unittest.TestCase):
         self.assertTrue(res)
         self.assertEqual(self.elevator.currentState, State.up)
         self.assertEqual(self.elevator.targetFloor, [2,3])
-    def test_checkTargetFloor_changeToDown(self):
+    def test9_3_checkTargetFloor_changeToDown(self):
         """Test the check target floor functionality: target floor downwards""" 
         self.elevator.currentDirection = Direction.down
         self.elevator.currentState = State.stopped_door_closed     
@@ -260,7 +260,7 @@ class TestElevator(unittest.TestCase):
         self.assertTrue(res)
         self.assertEqual(self.elevator.currentState, State.down)
         self.assertEqual(self.elevator.targetFloor, [2,1])
-    def test_checkTargetFloor_currentFloor(self):
+    def test9_4_checkTargetFloor_currentFloor(self):
         """Test the check target floor functionality: target floor current"""  
         self.elevator.currentDirection = Direction.up
         self.elevator.currentState = State.stopped_door_closed   
@@ -276,72 +276,72 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.targetFloor, [2])
         self.assertEqual(self.elevator.currentDirection, Direction.up)
 
-    def test_checkOpenDoor_whenDoorOpenFlagTrue(self):
+    def test10_checkOpenDoor_whenDoorOpenFlagTrue(self):
        
         self.elevator.doorOpenFlag = True
         self.elevator.checkOpenDoor()
         self.assertFalse(self.elevator.doorOpenFlag)
         self.assertEqual(self.elevator.currentState, State.stopped_opening_door)
 
-    def test_getCurrentFloor(self):
+    def test11_getCurrentFloor(self):
         self.elevator.currentPos = 0.4
         self.assertEqual(self.elevator.getCurrentFloor(), 0)    
         self.elevator.currentPos = 1.0
         self.assertEqual(self.elevator.getCurrentFloor(), 1)
 
-    def test_addTargetFloor_whenFloorAlreadyInTarget(self):
+    def test12_1_addTargetFloor_whenFloorAlreadyInTarget(self):
         self.elevator.targetFloor = [2, 3]
         result = self.elevator.addTargetFloor(2)
         self.assertEqual(result, "OK", "Should return 'OK' if floor is already in targetFloor")
         self.assertIn(2, self.elevator.targetFloor, "Floor 2 should still be in targetFloor")
 
-    def test_addTargetFloor_whenDirectionWaitAndFloorAbove(self):
+    def test12_2_addTargetFloor_whenDirectionWaitAndFloorAbove(self):
         self.elevator.currentPos = 1
         self.elevator.currentDirection = Direction.wait
         self.elevator.addTargetFloor(3)
         self.assertEqual(self.elevator.currentDirection, Direction.up, "Direction should be set to up")
         self.assertIn(3, self.elevator.targetFloor, "Floor 3 should be added to targetFloor")
 
-    def test_addTargetFloor_whenDirectionWaitAndFloorBelow(self):
+    def test12_3_addTargetFloor_whenDirectionWaitAndFloorBelow(self):
         self.elevator.currentPos = 3
         self.elevator.currentDirection = Direction.wait
         self.elevator.addTargetFloor(1)
         self.assertEqual(self.elevator.currentDirection, Direction.down, "Direction should be set to down")
         self.assertIn(1, self.elevator.targetFloor, "Floor 1 should be added to targetFloor")
 
-    def test_setOpenDoorFlag(self):
+    def test13_setOpenDoorFlag(self):
         self.elevator.doorOpenFlag = False
         self.elevator.setOpenDoorFlag()
         self.assertTrue(self.elevator.doorOpenFlag, "doorOpenFlag should be set to True")
 
-    def test_setCloseDoorFlag(self):
+    def test14_setCloseDoorFlag(self):
         self.elevator.doorCloseFlag = False
         self.elevator.setCloseDoorFlag()
         self.assertTrue(self.elevator.doorCloseFlag, "doorCloseFlag should be set to True")
 
-    def test_getDoorPercentage_whenStoppedClosingDoor(self):
+    def test15_1_getDoorPercentage_whenStoppedClosingDoor(self):
         self.elevator.currentState = State.stopped_closing_door
         self.elevator.doorInterval = 0.2
         expected_percentage = 0.8
         self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 0.5 when door is halfway through closing")
 
-    def test_getDoorPercentage_whenStoppedOpeningDoor(self):
+    def test15_2_getDoorPercentage_whenStoppedOpeningDoor(self):
         self.elevator.currentState = State.stopped_opening_door
         self.elevator.doorInterval = 0.1
         expected_percentage = 0.1
         self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 0.5 when door is halfway through opening")
 
-    def test_getDoorPercentage_whenStoppedDoorOpened(self):
+    def test15_3_getDoorPercentage_whenStoppedDoorOpened(self):
         self.elevator.currentState = State.stopped_door_opened
         expected_percentage = 1.0
         self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 1.0 when door is fully opened")
 
-    def test_getDoorPercentage_whenOtherStates(self):
+    def test15_4_getDoorPercentage_whenOtherStates(self):
         self.elevator.currentState = State.up
         expected_percentage = 0.0
         self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 0.0 when elevator is moving")
 
-    def test_update(self):
+    def test16_update(self):
         """Test the update functionality"""
         with patch.object(self.elevator, 'move') as mock_move:
             self.elevator.currentState = State.up
@@ -369,6 +369,6 @@ class TestElevator(unittest.TestCase):
             mock_checkTargetFloor.assert_called_once()
 if __name__ == "__main__":
     # app = QApplication(sys.argv)
-    unittest.main()
+    unittest.main(verbosity=2)
     # app.quit()
 
