@@ -276,7 +276,97 @@ class TestElevator(unittest.TestCase):
         self.assertEqual(self.elevator.targetFloor, [2])
         self.assertEqual(self.elevator.currentDirection, Direction.up)
 
+    def test_checkOpenDoor_whenDoorOpenFlagTrue(self):
+       
+        self.elevator.doorOpenFlag = True
+        self.elevator.checkOpenDoor()
+        self.assertFalse(self.elevator.doorOpenFlag)
+        self.assertEqual(self.elevator.currentState, State.stopped_opening_door)
 
+    def test_getCurrentFloor(self):
+        self.elevator.currentPos = 0.4
+        self.assertEqual(self.elevator.getCurrentFloor(), 0)    
+        self.elevator.currentPos = 1.0
+        self.assertEqual(self.elevator.getCurrentFloor(), 1)
+
+    def test_addTargetFloor_whenFloorAlreadyInTarget(self):
+        self.elevator.targetFloor = [2, 3]
+        result = self.elevator.addTargetFloor(2)
+        self.assertEqual(result, "OK", "Should return 'OK' if floor is already in targetFloor")
+        self.assertIn(2, self.elevator.targetFloor, "Floor 2 should still be in targetFloor")
+
+    def test_addTargetFloor_whenDirectionWaitAndFloorAbove(self):
+        self.elevator.currentPos = 1
+        self.elevator.currentDirection = Direction.wait
+        self.elevator.addTargetFloor(3)
+        self.assertEqual(self.elevator.currentDirection, Direction.up, "Direction should be set to up")
+        self.assertIn(3, self.elevator.targetFloor, "Floor 3 should be added to targetFloor")
+
+    def test_addTargetFloor_whenDirectionWaitAndFloorBelow(self):
+        self.elevator.currentPos = 3
+        self.elevator.currentDirection = Direction.wait
+        self.elevator.addTargetFloor(1)
+        self.assertEqual(self.elevator.currentDirection, Direction.down, "Direction should be set to down")
+        self.assertIn(1, self.elevator.targetFloor, "Floor 1 should be added to targetFloor")
+
+    def test_setOpenDoorFlag(self):
+        self.elevator.doorOpenFlag = False
+        self.elevator.setOpenDoorFlag()
+        self.assertTrue(self.elevator.doorOpenFlag, "doorOpenFlag should be set to True")
+
+    def test_setCloseDoorFlag(self):
+        self.elevator.doorCloseFlag = False
+        self.elevator.setCloseDoorFlag()
+        self.assertTrue(self.elevator.doorCloseFlag, "doorCloseFlag should be set to True")
+
+    def test_getDoorPercentage_whenStoppedClosingDoor(self):
+        self.elevator.currentState = State.stopped_closing_door
+        self.elevator.doorInterval = 0.2
+        expected_percentage = 0.8
+        self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 0.5 when door is halfway through closing")
+
+    def test_getDoorPercentage_whenStoppedOpeningDoor(self):
+        self.elevator.currentState = State.stopped_opening_door
+        self.elevator.doorInterval = 0.1
+        expected_percentage = 0.1
+        self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 0.5 when door is halfway through opening")
+
+    def test_getDoorPercentage_whenStoppedDoorOpened(self):
+        self.elevator.currentState = State.stopped_door_opened
+        expected_percentage = 1.0
+        self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 1.0 when door is fully opened")
+
+    def test_getDoorPercentage_whenOtherStates(self):
+        self.elevator.currentState = State.up
+        expected_percentage = 0.0
+        self.assertEqual(self.elevator.getDoorPercentage(), expected_percentage, "Door percentage should be 0.0 when elevator is moving")
+
+    def test_update(self):
+        """Test the update functionality"""
+        with patch.object(self.elevator, 'move') as mock_move:
+            self.elevator.currentState = State.up
+            self.elevator.update()
+            mock_move.assert_called_once()
+        
+        with patch.object(self.elevator, 'openingDoor') as mock_openingDoor:
+            self.elevator.currentState = State.stopped_opening_door
+            self.elevator.update()
+            mock_openingDoor.assert_called_once()
+        
+        with patch.object(self.elevator, 'waitForClosingDoor') as mock_waitForClosingDoor:
+            self.elevator.currentState = State.stopped_door_opened
+            self.elevator.update()
+            mock_waitForClosingDoor.assert_called_once()
+        
+        with patch.object(self.elevator, 'closingDoor') as mock_closingDoor:
+            self.elevator.currentState = State.stopped_closing_door
+            self.elevator.update()
+            mock_closingDoor.assert_called_once()
+        
+        with patch.object(self.elevator, 'checkTargetFloor') as mock_checkTargetFloor:
+            self.elevator.currentState = State.stopped_door_closed
+            self.elevator.update()
+            mock_checkTargetFloor.assert_called_once()
 if __name__ == "__main__":
     # app = QApplication(sys.argv)
     unittest.main()

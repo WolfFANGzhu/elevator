@@ -51,7 +51,7 @@ def testing(server:Server.ZmqServerThread):
             return True
     
     ############ Initialize Passengers ############
-    passengers = [Passenger(3, 1,"A"),Passenger(2, 3,"B"),Passenger(1, 3,"C")] ##There can be many passengers in testcase.
+    passengers = [Passenger(3, -1,"A"),Passenger(2, 3,"B"),Passenger(1, 3,"C")] ##There can be many passengers in testcase.
     timeStamp = -1 #default time stamp is -1
     clientMessage = 0 #default received message length is 0
     count = 0
