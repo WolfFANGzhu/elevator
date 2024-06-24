@@ -2,7 +2,7 @@
 
 ## Use case diagram
 
-![photo](../Requirement/Use_case_diagram.png)
+![photo](../Requirement/diagram_image/Use_case_diagram.png)
 
 ## Basic requirement
 
