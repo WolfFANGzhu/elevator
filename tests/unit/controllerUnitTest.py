@@ -4,11 +4,11 @@ from unittest.mock import Mock, patch
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication,QWidget
-from project.src.elevatorController import ElevatorController
-from project.src.elevator import Elevator
-from project.src.elevatorState import State
-from project.src.direction import Direction 
-from project.src import NetClient
+from src.elevatorController import ElevatorController
+from src.elevator import Elevator
+from src.elevatorState import State
+from src.direction import Direction 
+from src import NetClient
 
 class ElevatorControllerTest(unittest.TestCase):
     @classmethod

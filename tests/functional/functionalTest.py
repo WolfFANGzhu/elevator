@@ -1,6 +1,6 @@
 import unittest
-from project.tests.functional.scheduling_test import SchedulingFunctionalTest
-from project.tests.functional.door_test import DoorFunctionalTest
+from tests.functional.scheduling_test import SchedulingFunctionalTest
+from tests.functional.door_test import DoorFunctionalTest
 
 if __name__ == "__main__":
     test_loader = unittest.TestLoader()

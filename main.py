@@ -1,97 +1,39 @@
-import os
-import sys
+import subprocess
 import time
-from enum import IntEnum
-from project.src import NetClient
-from project.src.elevator import Elevator
-from project.src.elevatorState import State
-from project.src.elevatorController import ElevatorController
-from PyQt5.QtCore import QTimer
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
-##Example Code For Elevator Project
-#Feel free to rewrite this file!
+import argparse
 
-SIMULATION_SPEED = 100 #ms
-#Feel free to design the states of your elevator system.
-class ElevatorState(IntEnum):
-    up = 0
-    down = 1
-    stopped_door_closed = 2
-    stopped_door_opened = 3
-    stopped_opening_door = 4
+def run_command(command):
+    subprocess.Popen(f'start cmd /k {command}', shell=True)
 
-# This function determines whether a new message has been received
-def is_received_new_message(oldTimeStamp:int, oldServerMessage:str, Msgunprocessed:bool = False)->bool:
-    if(Msgunprocessed):
-        return True
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Run specified test commands.')
+    parser.add_argument('--test', type=str,default='main', help='The test to run:  main, door, main_src, scheduling, control_unit, elevator_unit')
+
+    args = parser.parse_args()
+
+    if args.test == 'main':
+        # Start the main application
+        run_command("python -m src.main")
+    elif args.test == 'door':
+        # Run the elevator door unit tests
+        run_command("python -m src.main")
+        time.sleep(5)
+        run_command("python -m tests.functional.door_test")
+    elif args.test == 'main_src':
+        # Run the main source file
+        run_command("python -m src.main")
+        time.sleep(5)
+        run_command("python -m tests.functional.passengerTest")
+    elif args.test == 'scheduling':
+        # Run the scheduling tests
+        run_command("python -m src.main")
+        time.sleep(5)
+        run_command("python -m tests.functional.scheduling_test")
+    elif args.test == 'control_unit':
+        run_command("python -m tests.unit.controllerUnitTest")
+    elif args.test == 'elevator_unit':
+        run_command("python -m tests.unit.elevatorUnitTest")
+
     else:
-        if(oldTimeStamp == zmqThread.messageTimeStamp and 
-           oldServerMessage == zmqThread.receivedMessage):
-            return False
-        else:
-            return True
+        print("Invalid test option. Available options: main, door, main_src, scheduling, control_unit, elevator_unit")
 
-if __name__=='__main__':
-
-    ############ Connect the Server ############
-    identity = "Team15" #write your team name here.
-    zmqThread = NetClient.ZmqClientThread(identity=identity)
-
-
-    ############ Initialize Elevator System ############
-    status = {
-        'timeStamp': -1,  # Used when receiving new message
-        'serverMessage': "",  # Used when receiving new message
-        'messageUnprocessed': False,  # Used when receiving new message
-        'temp_msg': ""
-    }
-    
-    app = QApplication(sys.argv)
-    e1 = Elevator(1,zmqThread)
-    e2 = Elevator(2,zmqThread)
-    # window 1~3 are the windows for the outside panel 
-    window1 = QtWidgets.QWidget()
-    window2 = QtWidgets.QWidget()
-    window3 = QtWidgets.QWidget()
-    window4 = QtWidgets.QWidget()  
-    simulation_window = QtWidgets.QWidget() 
-    controller = ElevatorController(zmqThread,e1,e2)
-    controller.create_window(window1,"fB1", up=True, down=False)
-    controller.create_window(window2,"f1", up=True, down=True)
-    controller.create_window(window3,"f2", up=True, down=True)
-    controller.create_window(window4,"f3", up=False, down=True)
-    controller.create_simulation_window(simulation_window)
-    controller.create_button_dict()
-    controller.connect()
-    for button_name, info in controller.button_dict.items():
-        button = info["button"]
-        state = info["state"]
-        elevator_id = info["elevatorId"]
-    print(f"Button Name: {button_name}, State: {state}, Elevator ID: {elevator_id}")
-    window1.show()
-    window2.show()
-    window3.show()
-    window4.show()
-    simulation_window.show()
-    e1.show()
-    e2.show()
-    def update(status):
-        if(len(zmqThread.buffer)!=0):
-            status["temp_msg"] = zmqThread.buffer.pop(0)
-        else:
-            status["temp_msg"] = ""
-        e1.update()
-        e2.update()
-        controller.update(status["temp_msg"])
-    timer = QTimer()
-    timer.timeout.connect(lambda: update(status))
-    timer.start(SIMULATION_SPEED)
-    sys.exit(app.exec_())
-
-            
-
-    '''
-    For Other kinds of available serverMessage, see readMe.txt
-    '''
-    

@@ -17,17 +17,17 @@ To run the tests, follow the steps below:
 2. Use the following command to run the desired test. Replace `test_type` with one of the following options: `main`, `door`, `main_src`, `scheduling`, `control_unit`, `elevator_unit`.
 
    ```bash
-   python -m run_command --test test_type
+   python -m main --test test_type
    ```
 
    For example, to run the `elevator` module's unit test, use:
 
    ```bash
-   python -m run_command --test elevator_unit
+   python -m main --test elevator_unit
    ```
 
    Or to run the system's door functional test, use:
 
    ```bash
-   python -m run_command --test door
+   python -m main --test door
    ```
