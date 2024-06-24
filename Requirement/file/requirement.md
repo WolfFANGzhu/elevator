@@ -12,17 +12,17 @@ In this project, our goal was to develop a software to manage the operation of t
 
 ## 3. Basic use case
 ### 3.1 Use case diagram
-<div align=center><img src=./new_use_case.png width = "65%" ></div>
+<div align=center><img src=../diagram_image/new_use_case.png width = "65%" ></div>
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system normal use case diagram</center>  
 This is a preliminary overview of the normal use case diagram for the elevator system. Specific details and requirements are discussed in the following sections.
 
 ### 3.2 Sequence diagram
-<div align=center><img src=./basic_sequence.png width = "70%" ></div>
+<div align=center><img src=../diagram_image/basic_sequence.png width = "70%" ></div>
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system basic sequence diagram</center> 
 This is a preliminary overview of the basic sequence diagram for the elevator system while using. Specific details and requirements are discussed in the following sections.
 
 ### 3.3 Class diagram
-<div align=center><img src=./class_diagram.png width = "70%" ></div>
+<div align=center><img src=../diagram_image/class_diagram.png width = "70%" ></div>
 <center style="font-size:14px;color:#C0C0C0;text-decoration:underline">Elevator system physical consists class diagram</center> 
 This is an intact overview of the class diagram for the elevator system physical consists.
 

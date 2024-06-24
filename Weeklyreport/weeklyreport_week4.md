@@ -2,11 +2,11 @@
 
 ## Use case diagram
 
-![photo](Use_case_diagram.png)
+![photo](../Requirement/Use_case_diagram.png)
 
 ## Basic requirement
 
-Discussed in the [requirement](../Requirement/requirement.md)
+Discussed in the [requirement](../Requirement/file/requirement.md)
 
 ## Goal for next week
 
